@@ -1,0 +1,13 @@
+{
+  "name": "green-cup-backend-config",
+  "version": "1.0.0",
+  "description": "Supabase schema and backend notes for the Green Cup dashboard",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Schema-only backend. Apply SQL in Supabase.\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
