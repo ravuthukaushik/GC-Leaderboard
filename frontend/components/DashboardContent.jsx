@@ -7,7 +7,6 @@ import AnalyticsPanel from "@/components/analytics-panel";
 import AdminPanel from "@/components/admin-panel";
 import HostelDataPanel from "@/components/hostel-data-panel";
 import JudgingCriteria from "@/components/judging-criteria";
-import BorderGlow from "@/components/BorderGlow";
 import { cx } from "@/lib/utils";
 
 export default function DashboardContent({
@@ -51,36 +50,6 @@ export default function DashboardContent({
     >
       <section className="masthead-panel">
         <Navbar viewer={viewer} onSignOut={onSignOut} />
-      </section>
-
-      <section className="insight-grid">
-        {payload.insights.map((insight) => (
-          <BorderGlow
-            key={insight.title}
-            className="glow-surface"
-            edgeSensitivity={26}
-            glowColor="142 42 58"
-            backgroundColor="rgba(255,255,255,0.82)"
-            borderRadius={22}
-            glowRadius={26}
-            glowIntensity={0.6}
-            coneSpread={24}
-            colors={["#79b5e8", "#9bcc56", "#5ec1a4"]}
-            fillOpacity={0.22}
-          >
-            <motion.article
-              className="insight-card"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: "easeInOut" }}
-              whileHover={{ y: -4, scale: 1.01 }}
-            >
-              <p className="eyebrow">{insight.label}</p>
-              <h3>{insight.title}</h3>
-              <p>{insight.description}</p>
-            </motion.article>
-          </BorderGlow>
-        ))}
       </section>
 
       <section className="tab-row" aria-label="Dashboard tabs">

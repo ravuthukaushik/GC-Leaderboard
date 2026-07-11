@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { BarChart3, Flame, Medal, Trophy } from "lucide-react";
 import BorderGlow from "@/components/BorderGlow";
+import { formatDelta } from "@/lib/utils";
 import {
   Bar,
   BarChart,
@@ -40,8 +42,7 @@ function AnalyticsTooltip({ active, payload, label }) {
 export default function AnalyticsPanel({ payload }) {
   const [leftHostel, setLeftHostel] = useState(payload.leaderboard[0]?.hostelId || "");
   const [rightHostel, setRightHostel] = useState(payload.leaderboard[1]?.hostelId || "");
-  const axisStroke = "#5f716d";
-  const gridStroke = "rgba(22, 55, 47, 0.12)";
+
   const comparison = useMemo(() => {
     const left = payload.leaderboard.find((item) => item.hostelId === leftHostel);
     const right = payload.leaderboard.find((item) => item.hostelId === rightHostel);
@@ -56,20 +57,90 @@ export default function AnalyticsPanel({ payload }) {
     ];
   }, [leftHostel, payload.leaderboard, rightHostel]);
 
+  const summaryCards = [
+    {
+      label: "Hostels",
+      value: payload.summary.hostelCount,
+      subtext: "in the Green Cup",
+      icon: Trophy
+    },
+    {
+      label: "Leaderboard",
+      value: payload.summary.leader?.name || "No data",
+      subtext: payload.summary.leader
+        ? `${payload.summary.leader.totalScore.toFixed(1)} average pts`
+        : "waiting for weekly uploads",
+      accent: "green",
+      icon: Medal
+    },
+    {
+      label: "Average Score",
+      value: payload.summary.monthlyAverage.toFixed(1),
+      subtext: "season-wide weekly average",
+      icon: BarChart3
+    },
+    {
+      label: "Biggest Climber",
+      value: payload.summary.biggestClimber?.name || "No change yet",
+      subtext: payload.summary.biggestClimber
+        ? formatDelta(payload.summary.biggestClimber.momentumDelta)
+        : "needs two weeks of data",
+      icon: Flame
+    }
+  ];
+
   return (
     <section className="panel-stack">
+      {/* ─── SUMMARY CARDS (relocated from leaderboard) ─── */}
+      <section className="card-grid">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <BorderGlow
+              key={card.label}
+              className="glow-surface"
+              edgeSensitivity={24}
+              glowColor="145 44 60"
+              backgroundColor="transparent"
+              borderRadius={22}
+              glowRadius={14}
+              glowIntensity={0.28}
+              coneSpread={22}
+              colors={card.accent ? ["#22C55E", "#3B82F6", "#4ADE80"] : ["#3B82F6", "#22C55E", "#60A5FA"]}
+              fillOpacity={0.08}
+            >
+              <motion.article
+                className={`summary-card${card.accent ? ` accent-${card.accent}` : ""}`}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                whileHover={{ y: -6, scale: 1.02 }}
+              >
+                <div className="summary-icon">
+                  <Icon size={18} />
+                </div>
+                <p className="summary-label">{card.label}</p>
+                <h2>{card.value}</h2>
+                <p className="summary-subtext">{card.subtext}</p>
+              </motion.article>
+            </BorderGlow>
+          );
+        })}
+      </section>
+
+      {/* ─── CHARTS ─── */}
       <div className="chart-grid">
         <BorderGlow
           className="glow-surface"
           edgeSensitivity={24}
           glowColor="205 62 72"
-          backgroundColor="rgba(255,255,255,0.82)"
+          backgroundColor="transparent"
           borderRadius={22}
-          glowRadius={24}
-          glowIntensity={0.56}
+          glowRadius={14}
+          glowIntensity={0.26}
           coneSpread={22}
-          colors={["#79b5e8", "#9bcc56", "#5ec1a4"]}
-          fillOpacity={0.18}
+          colors={["#3B82F6", "#22C55E", "#4ADE80"]}
+          fillOpacity={0.08}
         >
           <motion.article
             className="chart-card"
@@ -89,13 +160,13 @@ export default function AnalyticsPanel({ payload }) {
                 <LineChart data={payload.trends}>
                   <defs>
                     <linearGradient id="lineAverage" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#efe9dd" stopOpacity="0.98" />
-                      <stop offset="100%" stopColor="#bfdcca" stopOpacity="0.98" />
+                      <stop offset="0%" stopColor="#22C55E" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.4" />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke={gridStroke} vertical={false} />
-                  <XAxis dataKey="label" stroke={axisStroke} tick={{ fill: axisStroke }} />
-                  <YAxis stroke={axisStroke} tick={{ fill: axisStroke }} domain={[0, 100]} />
+                  <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                  <XAxis dataKey="label" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
+                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
                   <Tooltip content={<AnalyticsTooltip />} />
                   <Legend />
                   <Line
@@ -131,13 +202,13 @@ export default function AnalyticsPanel({ payload }) {
           className="glow-surface"
           edgeSensitivity={24}
           glowColor="37 78 70"
-          backgroundColor="rgba(255,255,255,0.82)"
+          backgroundColor="transparent"
           borderRadius={22}
-          glowRadius={24}
-          glowIntensity={0.56}
+          glowRadius={14}
+          glowIntensity={0.26}
           coneSpread={22}
-          colors={["#9bcc56", "#79b5e8", "#5ec1a4"]}
-          fillOpacity={0.18}
+          colors={["#22C55E", "#3B82F6", "#4ADE80"]}
+          fillOpacity={0.08}
         >
           <motion.article
             className="chart-card"
@@ -157,21 +228,21 @@ export default function AnalyticsPanel({ payload }) {
                 <BarChart data={payload.breakdown}>
                   <defs>
                     <linearGradient id="barElectricity" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#4dc68a" />
-                      <stop offset="100%" stopColor="#2c8f61" />
+                      <stop offset="0%" stopColor="#60A5FA" />
+                      <stop offset="100%" stopColor="#3B82F6" />
                     </linearGradient>
                     <linearGradient id="barWaste" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#f0b351" />
-                      <stop offset="100%" stopColor="#d8891a" />
+                      <stop offset="0%" stopColor="#4ADE80" />
+                      <stop offset="100%" stopColor="#22C55E" />
                     </linearGradient>
                     <linearGradient id="barEvents" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#8bc4eb" />
-                      <stop offset="100%" stopColor="#5a9dd0" />
+                      <stop offset="0%" stopColor="#FBBF24" />
+                      <stop offset="100%" stopColor="#F59E0B" />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid stroke={gridStroke} vertical={false} />
-                  <XAxis dataKey="name" stroke={axisStroke} tick={{ fill: axisStroke }} />
-                  <YAxis stroke={axisStroke} tick={{ fill: axisStroke }} domain={[0, 100]} />
+                  <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                  <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
+                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
                   <Tooltip content={<AnalyticsTooltip />} />
                   <Legend />
                   <Bar dataKey="electricity" stackId="a" fill="url(#barElectricity)" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={380} />
@@ -184,17 +255,18 @@ export default function AnalyticsPanel({ payload }) {
         </BorderGlow>
       </div>
 
+      {/* ─── BATTLE MODE ─── */}
       <BorderGlow
         className="glow-surface"
         edgeSensitivity={26}
         glowColor="190 55 70"
-        backgroundColor="rgba(255,255,255,0.82)"
+        backgroundColor="transparent"
         borderRadius={24}
-        glowRadius={26}
-        glowIntensity={0.62}
+        glowRadius={14}
+        glowIntensity={0.28}
         coneSpread={24}
-        colors={["#79b5e8", "#5ec1a4", "#9bcc56"]}
-        fillOpacity={0.18}
+        colors={["#3B82F6", "#4ADE80", "#22C55E"]}
+        fillOpacity={0.08}
       >
         <motion.section
           className="compare-card"
@@ -239,17 +311,17 @@ export default function AnalyticsPanel({ payload }) {
               <BarChart data={comparison}>
                 <defs>
                   <linearGradient id="compareLeft" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7dd7a4" />
-                    <stop offset="100%" stopColor="#52ae7a" />
+                    <stop offset="0%" stopColor="#4ADE80" />
+                    <stop offset="100%" stopColor="#22C55E" />
                   </linearGradient>
                   <linearGradient id="compareRight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#af95ef" />
-                    <stop offset="100%" stopColor="#8164cf" />
+                    <stop offset="0%" stopColor="#A78BFA" />
+                    <stop offset="100%" stopColor="#8B5CF6" />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke={gridStroke} vertical={false} />
-                <XAxis dataKey="metric" stroke={axisStroke} tick={{ fill: axisStroke }} />
-                <YAxis stroke={axisStroke} tick={{ fill: axisStroke }} domain={[0, 100]} />
+                <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
+                <XAxis dataKey="metric" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
+                <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
                 <Tooltip content={<AnalyticsTooltip />} />
                 <Legend />
                 {comparison[0]
