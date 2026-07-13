@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Crown } from "lucide-react";
 import RankBadge from "@/components/rank-badge";
+import BorderGlow from "@/components/BorderGlow";
 
 function CategoryBadges({ badges }) {
   if (!badges || badges.length === 0) return null;
@@ -145,73 +146,79 @@ export default function LeaderboardPanel({ payload }) {
       )}
 
       {/* ─── LEADERBOARD TABLE ─── */}
-      <motion.section
+      <BorderGlow
         className="table-panel"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
+        borderRadius={28}
+        colors={["#22C55E", "#3B82F6"]}
+        backgroundColor="var(--glass-bg)"
       >
-        <div className="panel-heading">
-          <div>
-            <p className="eyebrow">Full Standings</p>
-            <h3>Green Cup Leaderboard</h3>
-          </div>
-        </div>
-
         <motion.div
-          className="leaderboard-table"
-          variants={rowVariants}
-          initial="initial"
-          animate="animate"
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
         >
-          <div className="leaderboard-head">
-            <span>#</span>
-            <span></span>
-            <span>Hostel</span>
-            <span>Total</span>
-            <span>Basket split</span>
-            <span className="col-header-with-indicator">
-              <i className="header-indicator-dot" style={{ background: "var(--color-electricity)" }} />
-              Electricity
-            </span>
-            <span className="col-header-with-indicator">
-              <i className="header-indicator-dot" style={{ background: "var(--color-waste)" }} />
-              Waste
-            </span>
-            <span className="col-header-with-indicator">
-              <i className="header-indicator-dot" style={{ background: "var(--color-events)" }} />
-              Events
-            </span>
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">Full Standings</p>
+              <h3>Green Cup Leaderboard</h3>
+            </div>
           </div>
 
-          {payload.leaderboard.map((hostel) => (
-            <motion.article
-              key={hostel.hostelId}
-              className="leaderboard-row"
-              variants={itemVariants}
-              whileHover={{ x: 4, scale: 1.005 }}
-            >
-              <RankBadge rank={hostel.rank} />
-              <div className="hostel-avatar-small" aria-label={`${hostel.name} logo`} />
-              <div className="hostel-meta">
-                <strong>{hostel.name}</strong>
-                {hostel.categoryLeaderBadges?.length > 0 ? (
-                  <CategoryBadges badges={hostel.categoryLeaderBadges} />
-                ) : (
-                  <small>
-                    {hostel.badges.length ? hostel.badges.join(" · ") : "Average season score"}
-                  </small>
-                )}
-              </div>
-              <strong className="score-value">{hostel.totalScore.toFixed(1)}</strong>
-              <SegmentBar hostel={hostel} />
-              <span>{hostel.electricityScore.toFixed(1)}</span>
-              <span>{hostel.wasteScore.toFixed(1)}</span>
-              <span>{hostel.energyScore.toFixed(1)}</span>
-            </motion.article>
-          ))}
+          <motion.div
+            className="leaderboard-table"
+            variants={rowVariants}
+            initial="initial"
+            animate="animate"
+          >
+            <div className="leaderboard-head">
+              <span>#</span>
+              <span></span>
+              <span>Hostel</span>
+              <span>Total</span>
+              <span>Basket split</span>
+              <span className="col-header-with-indicator">
+                <i className="header-indicator-dot" style={{ background: "var(--color-electricity)" }} />
+                Electricity
+              </span>
+              <span className="col-header-with-indicator">
+                <i className="header-indicator-dot" style={{ background: "var(--color-waste)" }} />
+                Waste
+              </span>
+              <span className="col-header-with-indicator">
+                <i className="header-indicator-dot" style={{ background: "var(--color-events)" }} />
+                Events
+              </span>
+            </div>
+
+            {payload.leaderboard.map((hostel) => (
+              <motion.article
+                key={hostel.hostelId}
+                className="leaderboard-row"
+                variants={itemVariants}
+                whileHover={{ x: 4, scale: 1.005 }}
+              >
+                <RankBadge rank={hostel.rank} />
+                <div className="hostel-avatar-small" aria-label={`${hostel.name} logo`} />
+                <div className="hostel-meta">
+                  <strong>{hostel.name}</strong>
+                  {hostel.categoryLeaderBadges?.length > 0 ? (
+                    <CategoryBadges badges={hostel.categoryLeaderBadges} />
+                  ) : (
+                    <small>
+                      {hostel.badges.length ? hostel.badges.join(" · ") : "Average season score"}
+                    </small>
+                  )}
+                </div>
+                <strong className="score-value">{hostel.totalScore.toFixed(1)}</strong>
+                <SegmentBar hostel={hostel} />
+                <span>{hostel.electricityScore.toFixed(1)}</span>
+                <span>{hostel.wasteScore.toFixed(1)}</span>
+                <span>{hostel.energyScore.toFixed(1)}</span>
+              </motion.article>
+            ))}
+          </motion.div>
         </motion.div>
-      </motion.section>
+      </BorderGlow>
     </section>
   );
 }

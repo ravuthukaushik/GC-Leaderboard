@@ -378,11 +378,9 @@ textarea {
 
 /* ─── GLASSMORPHISM PANELS ─── */
 .glass-panel,
-.masthead-panel,
 .topbar,
 .summary-card,
 .insight-card,
-.table-panel,
 .feature-card,
 .chart-card,
 .compare-card,
@@ -409,7 +407,6 @@ textarea {
 .feature-card:hover,
 .chart-card:hover,
 .compare-card:hover,
-.table-panel:hover,
 .admin-form-card:hover,
 .hostel-data-card:hover,
 .auth-card:hover {
@@ -421,11 +418,9 @@ textarea {
 }
 
 .glass-panel::before,
-.masthead-panel::before,
 .topbar::before,
 .summary-card::before,
 .insight-card::before,
-.table-panel::before,
 .feature-card::before,
 .chart-card::before,
 .compare-card::before,
@@ -434,11 +429,9 @@ textarea {
 .locked-panel::before,
 .auth-card::before,
 .glass-panel::after,
-.masthead-panel::after,
 .topbar::after,
 .summary-card::after,
 .insight-card::after,
-.table-panel::after,
 .feature-card::after,
 .chart-card::after,
 .compare-card::after,
@@ -457,11 +450,9 @@ textarea {
 }
 
 .glass-panel::before,
-.masthead-panel::before,
 .topbar::before,
 .summary-card::before,
 .insight-card::before,
-.table-panel::before,
 .feature-card::before,
 .chart-card::before,
 .compare-card::before,
@@ -476,11 +467,9 @@ textarea {
 }
 
 .glass-panel > *,
-.masthead-panel > *,
 .topbar > *,
 .summary-card > *,
 .insight-card > *,
-.table-panel > *,
 .feature-card > *,
 .chart-card > *,
 .compare-card > *,
@@ -503,7 +492,6 @@ textarea {
   justify-content: space-between;
   align-items: center;
   gap: 18px;
-  margin-bottom: 18px;
 }
 
 .masthead-meta {
@@ -556,7 +544,7 @@ textarea {
 }
 
 .brand-lockup.compact {
-  gap: 0;
+  gap: 10px;
 }
 
 .brand-image {
@@ -591,6 +579,14 @@ textarea {
 .brand-copy span {
   font-size: 0.88rem;
   color: var(--text-muted);
+}
+
+.brand-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 /* ─── INTRO LOGO SCREEN ─── */
@@ -904,26 +900,62 @@ textarea {
 /* ─── TABS ─── */
 .tab-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   margin-top: 22px;
+  width: 100%;
+}
+
+.tab-glow-wrap {
+  flex: 1 1 50%;
+}
+
+.tab-glow-wrap .border-glow-inner {
+  display: flex;
 }
 
 .tab-button {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 12px 18px;
-  background: var(--tab-bg);
-  backdrop-filter: blur(12px);
+  flex: 1;
+  border: none;
+  border-radius: inherit;
+  padding: 14px 18px;
+  background: transparent;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease;
+}
+
+.tab-button:hover:not(.tab-active) {
+  color: var(--text);
 }
 
 .tab-active {
   background: var(--tab-active-bg);
   color: var(--text-strong);
+}
+
+.tab-glow-active {
   box-shadow: var(--glass-shadow);
-  border-color: var(--glass-border);
-  transform: translateY(-1px);
+}
+
+/* ─── ADMIN LOGIN GLOW ─── */
+.admin-login-glow {
+  flex-shrink: 0;
+}
+
+.admin-login-glow .border-glow-inner {
+  display: flex;
+}
+
+.admin-login-glow .meta-login {
+  border: none;
+  background: transparent;
+  padding: 8px 16px;
+  border-radius: inherit;
+  white-space: nowrap;
 }
 
 /* ─── LIVE PILL ─── */

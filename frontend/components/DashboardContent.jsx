@@ -7,6 +7,7 @@ import AnalyticsPanel from "@/components/analytics-panel";
 import AdminPanel from "@/components/admin-panel";
 import HostelDataPanel from "@/components/hostel-data-panel";
 import JudgingCriteria from "@/components/judging-criteria";
+import BorderGlow from "@/components/BorderGlow";
 import { cx } from "@/lib/utils";
 
 export default function DashboardContent({
@@ -25,6 +26,13 @@ export default function DashboardContent({
     ...(isAdminUser ? [{ id: "hostel-data", label: "Hostel Data" }] : []),
     ...(isDepartmentUser ? [{ id: "admin", label: "Admin" }] : [])
   ];
+
+  const tabGlowColors = {
+    leaderboard: ["#22C55E", "#3B82F6"],
+    analytics: ["#3B82F6", "#22C55E"],
+    "hostel-data": ["#22C55E", "#F59E0B"],
+    admin: ["#6366F1", "#3B82F6"]
+  };
 
   const contentVariants = {
     initial: { opacity: 0, y: 18 },
@@ -48,20 +56,32 @@ export default function DashboardContent({
       viewport={{ once: true, amount: 0.08 }}
       transition={{ duration: 0.48, ease: "easeInOut" }}
     >
-      <section className="masthead-panel">
+      <BorderGlow
+        className="masthead-panel"
+        borderRadius={32}
+        colors={["#22C55E", "#10B981"]}
+        backgroundColor="var(--glass-bg)"
+      >
         <Navbar viewer={viewer} onSignOut={onSignOut} />
-      </section>
+      </BorderGlow>
 
       <section className="tab-row" aria-label="Dashboard tabs">
         {tabs.map((tab) => (
-          <button
+          <BorderGlow
             key={tab.id}
-            type="button"
-            className={cx("tab-button", activeTab === tab.id && "tab-active")}
-            onClick={() => setActiveTab(tab.id)}
+            className={cx("tab-glow-wrap", activeTab === tab.id && "tab-glow-active")}
+            borderRadius={12}
+            colors={tabGlowColors[tab.id] || ["#22C55E", "#3B82F6"]}
+            backgroundColor="var(--tab-bg)"
           >
-            {tab.label}
-          </button>
+            <button
+              type="button"
+              className={cx("tab-button", activeTab === tab.id && "tab-active")}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          </BorderGlow>
         ))}
       </section>
 
