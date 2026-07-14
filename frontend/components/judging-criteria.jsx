@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import BorderGlow from "@/components/BorderGlow";
 
 const criteria = [
   {
@@ -50,6 +51,12 @@ export default function JudgingCriteria() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
+    <BorderGlow
+      className="glow-surface judging-glow-wrap"
+      borderRadius={28}
+      colors={["#22C55E", "#3B82F6"]}
+      backgroundColor="var(--glass-bg)"
+    >
     <motion.section
       className="judging-section"
       initial={{ opacity: 0, y: 24 }}
@@ -64,9 +71,7 @@ export default function JudgingCriteria() {
         aria-expanded={isOpen}
       >
         <div className="judging-trigger-left">
-          <p className="eyebrow">Scoring Framework</p>
           <h3>Green Cup Judging Criteria</h3>
-          <p>Scoring methodology used to evaluate hostel sustainability performance</p>
         </div>
         <ChevronDown
           size={22}
@@ -117,5 +122,6 @@ export default function JudgingCriteria() {
         )}
       </AnimatePresence>
     </motion.section>
+    </BorderGlow>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Crown } from "lucide-react";
 import RankBadge from "@/components/rank-badge";
 import BorderGlow from "@/components/BorderGlow";
+import PodiumCarousel from "@/components/podium-carousel";
 
 function CategoryBadges({ badges }) {
   if (!badges || badges.length === 0) return null;
@@ -48,69 +48,8 @@ function SegmentBar({ hostel }) {
   );
 }
 
-function PodiumCard({ hostel, rank }) {
-  const rankClass = `podium-card podium-rank-${rank}`;
-
-  return (
-    <div className={`podium-slot podium-slot-${rank}`}>
-      <motion.article
-        className={rankClass}
-        initial={{ opacity: 0, y: 40, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          duration: 0.6,
-          delay: rank === 1 ? 0 : rank === 2 ? 0.12 : 0.24,
-          ease: "easeOut"
-        }}
-        whileHover={{
-          y: -10,
-          scale: 1.03,
-          transition: { type: "spring", stiffness: 350, damping: 22 }
-        }}
-      >
-        {/* Crown / rank badge floating above avatar */}
-        <div className="podium-rank-indicator">
-          {rank === 1 ? (
-            <motion.div
-              className="podium-crown"
-              initial={{ scale: 0, rotate: -20 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.3, duration: 0.4, type: "spring" }}
-            >
-              <Crown size={28} />
-            </motion.div>
-          ) : (
-            <div className="podium-rank-badge">
-              {rank}
-            </div>
-          )}
-        </div>
-
-        {/* Avatar overlapping top edge */}
-        <div className="podium-avatar" aria-label={`${hostel.name} logo placeholder`} />
-
-        {/* Name */}
-        <span className="podium-name">{hostel.name}</span>
-
-        {/* Score */}
-        <span className="podium-score">{hostel.totalScore.toFixed(1)}</span>
-        <span className="podium-score-label">Total Score</span>
-
-        {/* Category badges */}
-        <CategoryBadges badges={hostel.categoryLeaderBadges} />
-      </motion.article>
-
-      {/* Pedestal base */}
-      <div className="podium-pedestal" />
-    </div>
-  );
-}
-
 export default function LeaderboardPanel({ payload }) {
   const top3 = payload.leaderboard.slice(0, 3);
-  const podiumOrder = top3.length >= 3
-    ? [top3[1], top3[0], top3[2]]
-    : top3;
 
   const rowVariants = {
     initial: {},
@@ -133,17 +72,7 @@ export default function LeaderboardPanel({ payload }) {
   return (
     <section className="panel-stack">
       {/* ─── TOP-3 PODIUM ─── */}
-      {top3.length >= 3 && (
-        <section className="podium-section" aria-label="Top 3 hostels">
-          {podiumOrder.map((hostel) => (
-            <PodiumCard
-              key={hostel.hostelId}
-              hostel={hostel}
-              rank={hostel.rank}
-            />
-          ))}
-        </section>
-      )}
+      {top3.length >= 3 && <PodiumCarousel top3={top3} />}
 
       {/* ─── LEADERBOARD TABLE ─── */}
       <BorderGlow
@@ -159,7 +88,6 @@ export default function LeaderboardPanel({ payload }) {
         >
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Full Standings</p>
               <h3>Green Cup Leaderboard</h3>
             </div>
           </div>
@@ -203,11 +131,9 @@ export default function LeaderboardPanel({ payload }) {
                   <strong>{hostel.name}</strong>
                   {hostel.categoryLeaderBadges?.length > 0 ? (
                     <CategoryBadges badges={hostel.categoryLeaderBadges} />
-                  ) : (
-                    <small>
-                      {hostel.badges.length ? hostel.badges.join(" · ") : "Average season score"}
-                    </small>
-                  )}
+                  ) : hostel.badges.length ? (
+                    <small>{hostel.badges.join(" · ")}</small>
+                  ) : null}
                 </div>
                 <strong className="score-value">{hostel.totalScore.toFixed(1)}</strong>
                 <SegmentBar hostel={hostel} />

@@ -12,22 +12,9 @@ export const metadata = {
   description: "Sustainability dashboard for the Green Cup at IIT Bombay."
 };
 
-const themeScript = `
-(function() {
-  try {
-    var saved = localStorage.getItem('gc-theme');
-    var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', theme);
-  } catch(e) {}
-})();
-`;
-
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+    <html lang="en" className={inter.variable}>
       <body>{children}</body>
     </html>
   );

@@ -18,6 +18,18 @@ import {
   YAxis
 } from "recharts";
 
+const BASKET_LABELS = {
+  electricity: "Electricity",
+  waste: "Waste",
+  energy: "Events"
+};
+
+const BASKET_SWATCH_COLORS = {
+  electricity: "var(--color-electricity)",
+  waste: "var(--color-waste)",
+  energy: "var(--color-events)"
+};
+
 function AnalyticsTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
 
@@ -28,8 +40,8 @@ function AnalyticsTooltip({ active, payload, label }) {
         {payload.map((item) => (
           <div key={item.dataKey} className="chart-tooltip-row">
             <span className="chart-tooltip-key">
-              <i style={{ background: item.color || item.fill }} />
-              {item.name || item.dataKey}
+              <i style={{ background: BASKET_SWATCH_COLORS[item.dataKey] || item.color || item.fill }} />
+              {BASKET_LABELS[item.dataKey] || item.name || item.dataKey}
             </span>
             <strong>{Number(item.value).toFixed(1)}</strong>
           </div>
@@ -59,24 +71,24 @@ export default function AnalyticsPanel({ payload }) {
 
   const summaryCards = [
     {
-      label: "Hostels",
+      label: "Participating Hostels",
       value: payload.summary.hostelCount,
-      subtext: "in the Green Cup",
+      subtext: "In Green Cup",
       icon: Trophy
     },
     {
-      label: "Leaderboard",
+      label: "Leader",
       value: payload.summary.leader?.name || "No data",
       subtext: payload.summary.leader
-        ? `${payload.summary.leader.totalScore.toFixed(1)} average pts`
+        ? `${payload.summary.leader.totalScore.toFixed(1)} average points`
         : "waiting for weekly uploads",
       accent: "green",
       icon: Medal
     },
     {
-      label: "Average Score",
+      label: "Average Points",
       value: payload.summary.monthlyAverage.toFixed(1),
-      subtext: "season-wide weekly average",
+      subtext: "Season Wide Average",
       icon: BarChart3
     },
     {
@@ -143,7 +155,7 @@ export default function AnalyticsPanel({ payload }) {
           fillOpacity={0.08}
         >
           <motion.article
-            className="chart-card"
+            className="chart-card lifetime-chart-card"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
@@ -151,35 +163,17 @@ export default function AnalyticsPanel({ payload }) {
           >
             <div className="panel-heading">
               <div>
-                <p className="eyebrow">Lifetime Trend</p>
-                <h3>Weekly movement across the full Green Cup timeline</h3>
+                <h3>Lifetime Average Points Trend</h3>
               </div>
             </div>
             <div className="chart-shell">
               <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={payload.trends}>
-                  <defs>
-                    <linearGradient id="lineAverage" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#22C55E" stopOpacity="0.4" />
-                      <stop offset="100%" stopColor="#3B82F6" stopOpacity="0.4" />
-                    </linearGradient>
-                  </defs>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="label" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
                   <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
                   <Tooltip content={<AnalyticsTooltip />} />
                   <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="averageScore"
-                    stroke="url(#lineAverage)"
-                    strokeWidth={4}
-                    strokeDasharray="8 6"
-                    dot={{ r: 4 }}
-                    name="Monthly average"
-                    isAnimationActive
-                    animationDuration={420}
-                  />
                   {payload.trendSeries.map((series) => (
                     <Line
                       key={series.key}
@@ -211,7 +205,7 @@ export default function AnalyticsPanel({ payload }) {
           fillOpacity={0.08}
         >
           <motion.article
-            className="chart-card"
+            className="chart-card snapshot-chart-card"
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.08, ease: "easeInOut" }}
@@ -219,8 +213,7 @@ export default function AnalyticsPanel({ payload }) {
           >
             <div className="panel-heading">
               <div>
-                <p className="eyebrow">Current Snapshot</p>
-                <h3>Latest week basket contribution by hostel</h3>
+                <h3>Current week basket contribution of each Hostel</h3>
               </div>
             </div>
             <div className="chart-shell">
@@ -236,17 +229,17 @@ export default function AnalyticsPanel({ payload }) {
                       <stop offset="100%" stopColor="#22C55E" />
                     </linearGradient>
                     <linearGradient id="barEvents" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#FBBF24" />
-                      <stop offset="100%" stopColor="#F59E0B" />
+                      <stop offset="0%" stopColor="#A78BFA" />
+                      <stop offset="100%" stopColor="#8B5CF6" />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
                   <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
-                  <Tooltip content={<AnalyticsTooltip />} />
+                  <Tooltip content={<AnalyticsTooltip />} cursor={false} />
                   <Legend />
-                  <Bar dataKey="electricity" stackId="a" fill="url(#barElectricity)" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={380} />
-                  <Bar dataKey="waste" stackId="a" fill="url(#barWaste)" isAnimationActive animationDuration={420} />
+                  <Bar dataKey="electricity" stackId="a" fill="url(#barElectricity)" isAnimationActive animationDuration={380} name="Electricity" />
+                  <Bar dataKey="waste" stackId="a" fill="url(#barWaste)" isAnimationActive animationDuration={420} name="Waste" />
                   <Bar dataKey="energy" stackId="a" fill="url(#barEvents)" isAnimationActive animationDuration={460} name="Events" />
                 </BarChart>
               </ResponsiveContainer>
@@ -269,7 +262,7 @@ export default function AnalyticsPanel({ payload }) {
         fillOpacity={0.08}
       >
         <motion.section
-          className="compare-card"
+          className="compare-card battle-mode-card"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.42, ease: "easeInOut" }}
@@ -315,14 +308,14 @@ export default function AnalyticsPanel({ payload }) {
                     <stop offset="100%" stopColor="#22C55E" />
                   </linearGradient>
                   <linearGradient id="compareRight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#A78BFA" />
-                    <stop offset="100%" stopColor="#8B5CF6" />
+                    <stop offset="0%" stopColor="#60A5FA" />
+                    <stop offset="100%" stopColor="#3B82F6" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                 <XAxis dataKey="metric" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
                 <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
-                <Tooltip content={<AnalyticsTooltip />} />
+                <Tooltip content={<AnalyticsTooltip />} cursor={false} />
                 <Legend />
                 {comparison[0]
                   ? Object.keys(comparison[0])

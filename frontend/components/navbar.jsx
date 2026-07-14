@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import AppLogo from "@/components/app-logo";
-import ThemeToggle from "@/components/theme-toggle";
 import BorderGlow from "@/components/BorderGlow";
 
 export default function Navbar({ viewer, onSignOut }) {
@@ -14,7 +13,6 @@ export default function Navbar({ viewer, onSignOut }) {
       <AppLogo compact />
 
       <div className="masthead-meta">
-        <ThemeToggle />
         {isDepartmentUser ? (
           <>
             <span className="meta-chip">{viewer.permissions?.label}</span>
