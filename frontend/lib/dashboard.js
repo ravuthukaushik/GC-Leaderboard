@@ -28,14 +28,6 @@ function numericHostelSort(left, right) {
 
 function roleMeta(role) {
   const config = {
-    pho: {
-      label: "PHO",
-      editableFields: ["wastedFoodKg", "segregationStatus", "hostelWasteKg"]
-    },
-    emd: {
-      label: "EMD",
-      editableFields: ["electricityKwh"]
-    },
     admin: {
       label: "Admin",
       editableFields: [
@@ -328,7 +320,7 @@ export async function getViewer() {
     role: activeRole,
     requestedRole: profile?.requested_role || profile?.role || "viewer",
     approved,
-    isAdmin: approved && ["admin", "pho", "emd"].includes(activeRole),
+    isAdmin: approved && activeRole === "admin",
     permissions: roleMeta(activeRole)
   };
 }

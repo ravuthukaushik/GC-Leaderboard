@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Lock, UploadCloud } from "lucide-react";
 
@@ -23,24 +23,6 @@ export default function AdminPanel({ payload, viewer, onSubmitted }) {
   });
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
-
-  const departments = useMemo(
-    () => [
-      {
-        name: "PHO",
-        copy: "Can upload wasted food in mess, mess waste segregation, and hostel waste."
-      },
-      {
-        name: "EMD",
-        copy: "Can upload electricity usage for each hostel."
-      },
-      {
-        name: "Admin",
-        copy: "Can edit weekly fields flexibly and manage hostel-level student strength."
-      }
-    ],
-    [],
-  );
 
   const permissions = viewer?.permissions?.editableFields || [];
   const roleLabel = viewer?.permissions?.label || "Viewer";
@@ -98,8 +80,8 @@ export default function AdminPanel({ payload, viewer, onSubmitted }) {
         </div>
         <h3>Admin access required</h3>
         <p>
-          The public leaderboard stays open, but weekly submissions require a PHO,
-          EMD, or Admin account.
+          The public leaderboard stays open, but weekly submissions require an
+          Admin account.
         </p>
         <Link href="/auth" className="primary-button">
           Open admin login
@@ -110,16 +92,6 @@ export default function AdminPanel({ payload, viewer, onSubmitted }) {
 
   return (
     <section className="panel-stack">
-      <div className="insight-grid">
-        {departments.map((department) => (
-          <article key={department.name} className="insight-card">
-            <p className="eyebrow">Department feed</p>
-            <h3>{department.name}</h3>
-            <p>{department.copy}</p>
-          </article>
-        ))}
-      </div>
-
       <section className="admin-form-card">
         <div className="panel-heading">
           <div>
@@ -128,7 +100,7 @@ export default function AdminPanel({ payload, viewer, onSubmitted }) {
           </div>
           <div className="live-pill">
             <UploadCloud size={14} />
-            Your account can edit only assigned fields
+            Admin can edit all weekly fields
           </div>
         </div>
 
