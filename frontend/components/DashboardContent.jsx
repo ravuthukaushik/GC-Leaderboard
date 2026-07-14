@@ -27,6 +27,13 @@ export default function DashboardContent({
     ...(isDepartmentUser ? [{ id: "admin", label: "Admin" }] : [])
   ];
 
+  const tabGlowColors = {
+    leaderboard: ["#22C55E", "#3B82F6"],
+    analytics: ["#3B82F6", "#22C55E"],
+    "hostel-data": ["#22C55E", "#F59E0B"],
+    admin: ["#6366F1", "#3B82F6"]
+  };
+
   const contentVariants = {
     initial: { opacity: 0, y: 18 },
     animate: {
@@ -49,50 +56,32 @@ export default function DashboardContent({
       viewport={{ once: true, amount: 0.08 }}
       transition={{ duration: 0.48, ease: "easeInOut" }}
     >
-      <section className="masthead-panel">
+      <BorderGlow
+        className="masthead-panel"
+        borderRadius={32}
+        colors={["#22C55E", "#10B981"]}
+        backgroundColor="var(--glass-bg)"
+      >
         <Navbar viewer={viewer} onSignOut={onSignOut} />
-      </section>
-
-      <section className="insight-grid">
-        {payload.insights.map((insight) => (
-          <BorderGlow
-            key={insight.title}
-            className="glow-surface"
-            edgeSensitivity={26}
-            glowColor="142 42 58"
-            backgroundColor="rgba(255,255,255,0.82)"
-            borderRadius={22}
-            glowRadius={26}
-            glowIntensity={0.6}
-            coneSpread={24}
-            colors={["#79b5e8", "#9bcc56", "#5ec1a4"]}
-            fillOpacity={0.22}
-          >
-            <motion.article
-              className="insight-card"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: "easeInOut" }}
-              whileHover={{ y: -4, scale: 1.01 }}
-            >
-              <p className="eyebrow">{insight.label}</p>
-              <h3>{insight.title}</h3>
-              <p>{insight.description}</p>
-            </motion.article>
-          </BorderGlow>
-        ))}
-      </section>
+      </BorderGlow>
 
       <section className="tab-row" aria-label="Dashboard tabs">
         {tabs.map((tab) => (
-          <button
+          <BorderGlow
             key={tab.id}
-            type="button"
-            className={cx("tab-button", activeTab === tab.id && "tab-active")}
-            onClick={() => setActiveTab(tab.id)}
+            className={cx("tab-glow-wrap", activeTab === tab.id && "tab-glow-active")}
+            borderRadius={12}
+            colors={tabGlowColors[tab.id] || ["#22C55E", "#3B82F6"]}
+            backgroundColor="var(--tab-bg)"
           >
-            {tab.label}
-          </button>
+            <button
+              type="button"
+              className={cx("tab-button", activeTab === tab.id && "tab-active")}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          </BorderGlow>
         ))}
       </section>
 

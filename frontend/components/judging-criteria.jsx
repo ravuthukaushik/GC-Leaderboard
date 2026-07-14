@@ -1,6 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import BorderGlow from "@/components/BorderGlow";
 
 const criteria = [
@@ -46,7 +48,15 @@ const criteria = [
 ];
 
 export default function JudgingCriteria() {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
+    <BorderGlow
+      className="glow-surface judging-glow-wrap"
+      borderRadius={28}
+      colors={["#22C55E", "#3B82F6"]}
+      backgroundColor="var(--glass-bg)"
+    >
     <motion.section
       className="judging-section"
       initial={{ opacity: 0, y: 24 }}
@@ -54,56 +64,64 @@ export default function JudgingCriteria() {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.45, ease: "easeInOut" }}
     >
-      <div className="judging-header">
-        <p className="eyebrow">Scoring Framework</p>
-        <h2>Green Cup Judging Criteria</h2>
-        <p className="judging-subtitle">
-          Scoring methodology used to evaluate hostel sustainability performance
-        </p>
-      </div>
-
-      <BorderGlow
-        className="glow-surface"
-        edgeSensitivity={22}
-        glowColor="150 40 62"
-        backgroundColor="rgba(255,255,255,0.9)"
-        borderRadius={28}
-        glowRadius={22}
-        glowIntensity={0.5}
-        coneSpread={20}
-        colors={["#79b5e8", "#9bcc56", "#5ec1a4"]}
-        fillOpacity={0.16}
+      <button
+        type="button"
+        className="judging-collapsible-trigger"
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
       >
-        <div className="judging-table-shell">
-          <div className="judging-table-scroll">
-            <table className="judging-table">
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Source</th>
-                  <th>Scoring</th>
-                  <th>Weightage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {criteria.map((item, index) => (
-                  <motion.tr
-                    key={item.parameter}
-                    className={index % 2 === 1 ? "judging-row-alt" : ""}
-                    whileHover={{ scale: 1.005 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <td className="judging-parameter">{item.parameter}</td>
-                    <td>{item.source}</td>
-                    <td className="judging-scoring">{item.scoring}</td>
-                    <td className="judging-weight">{item.weight}</td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="judging-trigger-left">
+          <h3>Green Cup Judging Criteria</h3>
         </div>
-      </BorderGlow>
+        <ChevronDown
+          size={22}
+          className={`judging-chevron ${isOpen ? "judging-chevron-open" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="judging-content-wrapper"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+          >
+            <div className="judging-table-shell">
+              <div className="judging-table-scroll">
+                <table className="judging-table">
+                  <thead>
+                    <tr>
+                      <th>Parameter</th>
+                      <th>Source</th>
+                      <th>Scoring</th>
+                      <th>Weightage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {criteria.map((item, index) => (
+                      <motion.tr
+                        key={item.parameter}
+                        className={index % 2 === 1 ? "judging-row-alt" : ""}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.25, delay: index * 0.04 }}
+                      >
+                        <td className="judging-parameter">{item.parameter}</td>
+                        <td>{item.source}</td>
+                        <td className="judging-scoring">{item.scoring}</td>
+                        <td className="judging-weight">{item.weight}</td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
+    </BorderGlow>
   );
 }

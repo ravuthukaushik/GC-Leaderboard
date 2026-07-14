@@ -6,17 +6,7 @@ export default function AppLogo({ compact = false }) {
         alt="Sustainability Cell logo"
         className={compact ? "brand-image compact" : "brand-image"}
       />
-      {compact ? (
-        <div className="brand-copy">
-          <strong>Green Cup</strong>
-          <span>Sustainability Cell, IIT Bombay</span>
-        </div>
-      ) : (
-        <div className="brand-copy">
-          <strong>Green Cup</strong>
-          <span>Sustainability Cell, IIT Bombay</span>
-        </div>
-      )}
+      <span className="brand-title">Sustainability Cell, IIT Bombay</span>
     </div>
   );
 }

@@ -15,12 +15,6 @@ export const PLACEMENT_POINTS = {
   orientation: [5, 3.5, 2.5]
 };
 
-export const SEGREGATION_LABELS = {
-  segregated: "Well segregated",
-  partial: "Partially segregated",
-  not_segregated: "Not segregated"
-};
-
 export const SEGREGATION_POINTS = {
   segregated: SCORE_LIMITS.segregation,
   partial: SCORE_LIMITS.segregation / 2,

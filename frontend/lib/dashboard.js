@@ -50,7 +50,7 @@ function roleMeta(role) {
 
 function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoData }) {
   const activeWeek = weeks.find((week) => week.id === activeWeekId) || weeks.at(-1);
-  const visibleHostels = [...hostels].sort(numericHostelSort).slice(0, 5);
+  const visibleHostels = [...hostels].sort(numericHostelSort);
   const visibleHostelIds = new Set(visibleHostels.map((hostel) => hostel.id));
   const allScores = weeks.flatMap((week) =>
     (scoresByWeek[week.id] || []).filter((score) => visibleHostelIds.has(score.hostelId)),
@@ -155,6 +155,21 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
   const bestWaste = [...leaderboard].sort((a, b) => b.wasteScore - a.wasteScore)[0] || null;
   const bestEnergy = [...leaderboard].sort((a, b) => b.energyScore - a.energyScore)[0] || null;
   const electricityLeader = [...leaderboard].sort((a, b) => b.electricityScore - a.electricityScore)[0] || null;
+
+  const categoryLeaders = {
+    electricity: electricityLeader?.hostelId || null,
+    waste: bestWaste?.hostelId || null,
+    events: bestEnergy?.hostelId || null
+  };
+
+  leaderboard.forEach((entry) => {
+    const badges = [];
+    if (entry.hostelId === categoryLeaders.electricity) badges.push("⚡ Electricity Leader");
+    if (entry.hostelId === categoryLeaders.waste) badges.push("♻️ Waste Leader");
+    if (entry.hostelId === categoryLeaders.events) badges.push("📅 Events Leader");
+    entry.categoryLeaderBadges = badges;
+  });
+
   const monthlyAverage = trends.length
     ? round(trends.reduce((sum, week) => sum + week.averageScore, 0) / trends.length)
     : averageScore;
@@ -168,6 +183,7 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
     breakdown,
     trends,
     trendSeries,
+    categoryLeaders,
     insights: [
       {
         label: "Overall leader",
