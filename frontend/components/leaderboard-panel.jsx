@@ -12,9 +12,9 @@ function CategoryBadges({ badges }) {
     <div className="hostel-meta-badges">
       {badges.map((badge) => {
         let cls = "category-badge";
-        if (badge.includes("Electricity")) cls += " badge-electricity";
+        if (badge.includes("Resources")) cls += " badge-electricity";
         else if (badge.includes("Waste")) cls += " badge-waste";
-        else if (badge.includes("Events")) cls += " badge-events";
+        else if (badge.includes("Community")) cls += " badge-events";
         return (
           <span key={badge} className={cls}>
             {badge}
@@ -27,9 +27,9 @@ function CategoryBadges({ badges }) {
 
 function SegmentBar({ hostel }) {
   const segments = [
-    { label: "Electricity", value: hostel.electricityScore, color: "var(--color-electricity)" },
+    { label: "Resources", value: hostel.resourcesScore, color: "var(--color-electricity)" },
     { label: "Waste", value: hostel.wasteScore, color: "var(--color-waste)" },
-    { label: "Events", value: hostel.energyScore, color: "var(--color-events)" }
+    { label: "Community", value: hostel.communityScore, color: "var(--color-events)" }
   ];
 
   return (
@@ -106,7 +106,7 @@ export default function LeaderboardPanel({ payload }) {
               <span>Basket split</span>
               <span className="col-header-with-indicator">
                 <i className="header-indicator-dot" style={{ background: "var(--color-electricity)" }} />
-                Electricity
+                Resources
               </span>
               <span className="col-header-with-indicator">
                 <i className="header-indicator-dot" style={{ background: "var(--color-waste)" }} />
@@ -114,7 +114,7 @@ export default function LeaderboardPanel({ payload }) {
               </span>
               <span className="col-header-with-indicator">
                 <i className="header-indicator-dot" style={{ background: "var(--color-events)" }} />
-                Events
+                Community
               </span>
             </div>
 
@@ -137,9 +137,9 @@ export default function LeaderboardPanel({ payload }) {
                 </div>
                 <strong className="score-value">{hostel.totalScore.toFixed(1)}</strong>
                 <SegmentBar hostel={hostel} />
-                <span>{hostel.electricityScore.toFixed(1)}</span>
+                <span>{hostel.resourcesScore.toFixed(1)}</span>
                 <span>{hostel.wasteScore.toFixed(1)}</span>
-                <span>{hostel.energyScore.toFixed(1)}</span>
+                <span>{hostel.communityScore.toFixed(1)}</span>
               </motion.article>
             ))}
           </motion.div>

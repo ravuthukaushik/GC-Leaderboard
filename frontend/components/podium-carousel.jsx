@@ -1,85 +1,58 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Crown } from "lucide-react";
+import PodiumMedal from "@/components/podium-medal";
 
-const DEG = Math.PI / 180;
-const CARD_COUNT = 3;
+// Per-rank choreography. Each card starts stacked behind the champion (hero
+// state) and slides out to its podium slot as the section is scrolled through.
+const LAYOUT = {
+  1: { xStart: "0vw", xEnd: "0vw", yStart: 96, yEnd: -12, scaleStart: 1.12, scaleEnd: 1, opStart: 1, z: 3 },
+  2: { xStart: "0vw", xEnd: "-23vw", yStart: 104, yEnd: 30, scaleStart: 0.6, scaleEnd: 0.82, opStart: 0, z: 2 },
+  3: { xStart: "0vw", xEnd: "23vw", yStart: 104, yEnd: 48, scaleStart: 0.58, scaleEnd: 0.72, opStart: 0, z: 2 }
+};
 
-function useRingGeometry() {
-  const [geometry, setGeometry] = useState({ radius: 32, tilt: 28 });
-
-  useEffect(() => {
-    const narrow = window.matchMedia("(max-width: 780px)");
-    const medium = window.matchMedia("(max-width: 1024px)");
-
-    const update = () => {
-      if (narrow.matches) setGeometry({ radius: 20, tilt: 16 });
-      else if (medium.matches) setGeometry({ radius: 26, tilt: 22 });
-      else setGeometry({ radius: 32, tilt: 28 });
-    };
-
-    update();
-    narrow.addEventListener("change", update);
-    medium.addEventListener("change", update);
-    return () => {
-      narrow.removeEventListener("change", update);
-      medium.removeEventListener("change", update);
-    };
-  }, []);
-
-  return geometry;
+function ChampionScore({ value }) {
+  return (
+    <>
+      <span className="podium-score">{value.toFixed(1)}</span>
+      <span className="podium-score-label">Total Score</span>
+    </>
+  );
 }
 
-// Distance of card `index` from the active card, wrapped to [-1, 1] so
-// only "front / peeking-left / peeking-right" positions ever occur.
-function relativePosition(index, activeIndex) {
-  let rel = index - activeIndex;
-  if (rel > 1) rel -= CARD_COUNT;
-  if (rel < -1) rel += CARD_COUNT;
-  return rel;
-}
+function PodiumCard({ hostel, rank, progress }) {
+  const cfg = LAYOUT[rank] || LAYOUT[3];
 
-function CarouselCard({ hostel, rank, index, activeIndex, radius, tilt }) {
-  const rel = relativePosition(index, activeIndex);
-  // Next-up card approaches from the left, the previous card recedes to the right.
-  const angleRad = -rel * 120 * DEG;
-  const depth = (Math.cos(angleRad) + 1) / 2;
-
-  const target = {
-    x: `${Math.sin(angleRad) * radius}vw`,
-    scale: 0.72 + 0.28 * depth,
-    opacity: 0.32 + 0.68 * depth,
-    rotateY: -Math.sin(angleRad) * tilt
-  };
+  const x = useTransform(progress, [0, 0.55], [cfg.xStart, cfg.xEnd]);
+  const y = useTransform(progress, [0, 0.55], [cfg.yStart, cfg.yEnd]);
+  const scale = useTransform(progress, [0, 0.55], [cfg.scaleStart, cfg.scaleEnd]);
+  const opacity = useTransform(progress, [0, 0.3], [cfg.opStart, 1]);
 
   return (
-    <div className={`carousel-card-slot slot-rank-${rank}`} style={{ zIndex: rel === 0 ? 3 : 2 }}>
+    <div className={`carousel-card-slot slot-rank-${rank}`} style={{ zIndex: cfg.z }}>
       <motion.article
         className={`carousel-card carousel-rank-${rank}`}
-        animate={target}
-        transition={{ type: "spring", stiffness: 220, damping: 28, mass: 0.9 }}
-        whileHover={{
-          y: -14,
-          scale: target.scale * 1.05,
-          transition: { type: "spring", stiffness: 300, damping: 20 }
-        }}
+        style={{ x, y, scale, opacity }}
+        whileHover={{ y: cfg.yEnd - 14, transition: { type: "spring", stiffness: 300, damping: 20 } }}
       >
         <div className="podium-rank-indicator">
           {rank === 1 ? (
-            <div className="podium-crown">
+            <div className="podium-crown podium-crown-float">
               <Crown size={28} />
             </div>
           ) : (
-            <div className="podium-rank-badge">{rank}</div>
+            <div className="podium-rank-medal">
+              <PodiumMedal rank={rank} size={54} />
+            </div>
           )}
         </div>
 
         <div className="podium-avatar" aria-label={`${hostel.name} logo placeholder`} />
+
         <span className="podium-name">{hostel.name}</span>
-        <span className="podium-score">{hostel.totalScore.toFixed(1)}</span>
-        <span className="podium-score-label">Total Score</span>
+        <ChampionScore value={hostel.totalScore} />
       </motion.article>
     </div>
   );
@@ -87,34 +60,51 @@ function CarouselCard({ hostel, rank, index, activeIndex, radius, tilt }) {
 
 export default function PodiumCarousel({ top3 }) {
   const wrapRef = useRef(null);
-  const { radius, tilt } = useRingGeometry();
-  const [activeIndex, setActiveIndex] = useState(0);
   const { scrollYProgress } = useScroll({
     target: wrapRef,
     offset: ["start start", "end end"]
   });
 
-  useMotionValueEvent(scrollYProgress, "change", (value) => {
-    const step = Math.min(CARD_COUNT - 1, Math.max(0, Math.floor(value * CARD_COUNT)));
-    setActiveIndex((current) => (current === step ? current : step));
-  });
+  const champion = top3.find((h) => h.rank === 1) || top3[0];
+
+  // Big hero title condenses into a compact eyebrow as you scroll in.
+  const titleScale = useTransform(scrollYProgress, [0, 0.42], [1, 0.44]);
+  const titleY = useTransform(scrollYProgress, [0, 0.42], [0, -54]);
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.36, 0.5], [1, 0.7, 0.55]);
+  const heroGlow = useTransform(scrollYProgress, [0, 0.5], [1, 0.35]);
+  const scrollHintOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
 
   return (
     <section className="podium-carousel-wrap" ref={wrapRef} aria-label="Top 3 hostels">
       <div className="podium-carousel-sticky">
+        <motion.div className="podium-hero-glow" style={{ opacity: heroGlow }} aria-hidden="true" />
+
+        <motion.header
+          className="podium-hero-title"
+          style={{ scale: titleScale, y: titleY, opacity: titleOpacity }}
+        >
+          <span className="podium-hero-eyebrow">Green Cup · Live Standings</span>
+          <h2>
+            Leading the race:{" "}
+            <span className="podium-hero-champion">{champion?.name}</span>
+          </h2>
+        </motion.header>
+
         <div className="podium-carousel-stage">
-          {top3.map((hostel, i) => (
-            <CarouselCard
+          {top3.map((hostel) => (
+            <PodiumCard
               key={hostel.hostelId}
               hostel={hostel}
               rank={hostel.rank}
-              index={i}
-              activeIndex={activeIndex}
-              radius={radius}
-              tilt={tilt}
+              progress={scrollYProgress}
             />
           ))}
         </div>
+
+        <motion.div className="podium-scroll-hint" style={{ opacity: scrollHintOpacity }} aria-hidden="true">
+          <span>Scroll to reveal the podium</span>
+          <div className="podium-scroll-mouse" />
+        </motion.div>
       </div>
     </section>
   );

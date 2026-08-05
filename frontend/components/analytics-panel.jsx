@@ -19,15 +19,15 @@ import {
 } from "recharts";
 
 const BASKET_LABELS = {
-  electricity: "Electricity",
+  resources: "Resources",
   waste: "Waste",
-  energy: "Events"
+  community: "Community"
 };
 
 const BASKET_SWATCH_COLORS = {
-  electricity: "var(--color-electricity)",
+  resources: "var(--color-electricity)",
   waste: "var(--color-waste)",
-  energy: "var(--color-events)"
+  community: "var(--color-events)"
 };
 
 function AnalyticsTooltip({ active, payload, label }) {
@@ -63,9 +63,9 @@ export default function AnalyticsPanel({ payload }) {
 
     return [
       { metric: "Total", [left.name]: left.totalScore, [right.name]: right.totalScore },
-      { metric: "Electricity", [left.name]: left.electricityScore, [right.name]: right.electricityScore },
+      { metric: "Resources", [left.name]: left.resourcesScore, [right.name]: right.resourcesScore },
       { metric: "Waste", [left.name]: left.wasteScore, [right.name]: right.wasteScore },
-      { metric: "Events", [left.name]: left.energyScore, [right.name]: right.energyScore }
+      { metric: "Community", [left.name]: left.communityScore, [right.name]: right.communityScore }
     ];
   }, [leftHostel, payload.leaderboard, rightHostel]);
 
@@ -238,9 +238,9 @@ export default function AnalyticsPanel({ payload }) {
                   <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
                   <Tooltip content={<AnalyticsTooltip />} cursor={false} />
                   <Legend />
-                  <Bar dataKey="electricity" stackId="a" fill="url(#barElectricity)" isAnimationActive animationDuration={380} name="Electricity" />
+                  <Bar dataKey="resources" stackId="a" fill="url(#barElectricity)" isAnimationActive animationDuration={380} name="Resources" />
                   <Bar dataKey="waste" stackId="a" fill="url(#barWaste)" isAnimationActive animationDuration={420} name="Waste" />
-                  <Bar dataKey="energy" stackId="a" fill="url(#barEvents)" isAnimationActive animationDuration={460} name="Events" />
+                  <Bar dataKey="community" stackId="a" fill="url(#barEvents)" isAnimationActive animationDuration={460} name="Community" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

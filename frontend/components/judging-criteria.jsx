@@ -7,43 +7,52 @@ import BorderGlow from "@/components/BorderGlow";
 
 const criteria = [
   {
-    parameter: "Wasted Food in Mess",
-    source: "PHO",
-    scoring: "Rank-based scoring",
-    weight: "20%"
-  },
-  {
-    parameter: "Mess Waste Segregation",
-    source: "PHO and Biogas plant",
-    scoring:
-      "100 - Well segregated\n50 - Partially segregated\n0 - Not segregated\nWill be decided by PHO at the time of waste collection",
-    weight: "15%"
-  },
-  {
-    parameter: "Hostel Waste",
-    source: "PHO",
-    scoring: "Rank-based scoring",
-    weight: "10%"
-  },
-  {
-    parameter: "Electricity Usage",
+    parameter: "Electricity",
     source: "EMD",
-    scoring: "Rank-based scoring",
-    weight: "30%"
-  },
-  {
-    parameter: "Events / ZWDs",
-    source: "Hostel Council",
     scoring:
-      "100 - Conducted >= 2 events in the month\n50 - Conducted >= 1 event in the month\n0 - No events conducted\nWill be decided by Sustainability Cell based on a report submitted by the Hostel Councils",
-    weight: "20%"
+      "Consumption (10): relative — lowest per-capita monthly consumption scores highest\nHostel-wide initiative (5): 5 if at least one verified initiative, else 0",
+    weight: "15"
   },
   {
-    parameter: "Attendance in Green Cup orientation",
+    parameter: "Water",
+    source: "Hostel / Sustainability Cell",
+    scoring:
+      "Water meter installed (10): 10 if yes, 0 if no\nOverflow sensors (5): ratio of working sensors to tanks; penalty when none installed",
+    weight: "15"
+  },
+  {
+    parameter: "Waste",
+    source: "PHO",
+    scoring:
+      "Mess waste (10): relative — lowest per-capita mess waste scores highest\nSegregation signage (5): share of dustbins with proper signage\nWaste-reduction initiative (5): 5 if at least one, else 0",
+    weight: "20"
+  },
+  {
+    parameter: "Representation",
     source: "Sustainability Cell",
     scoring:
-      "100 - Highest attendance\n75 - 2nd highest attendance\n50 - 3rd highest attendance",
-    weight: "5%"
+      "Sustainability secretary (5): 5 if appointed, else 0\nRegular meets (10): attendance ratio in monthly meets\nPilot involvement (5): 5 if a pilot/suggestion held per sem, else 0",
+    weight: "20"
+  },
+  {
+    parameter: "Events (Individual Participation)",
+    source: "Sustainability Cell",
+    scoring:
+      "Performance: Winner 100, Runner-up 90, then -10 per placement\nParticipation: participating students / total students × 100\nWeighted to the 20-point basket",
+    weight: "20"
+  },
+  {
+    parameter: "Attendance (GC Opening Ceremony)",
+    source: "Sustainability Cell",
+    scoring: "Representatives attending / total hostel students, scaled to 5 points",
+    weight: "5"
+  },
+  {
+    parameter: "Extras",
+    source: "Impact reports + valid proofs",
+    scoring:
+      "SOP-listed initiatives: 3 points each\nNew/unique initiatives: up to 5 points each (subjective)\nGanesha workshop: participation percentage, scaled to 5 points",
+    weight: "Bonus"
   }
 ];
 

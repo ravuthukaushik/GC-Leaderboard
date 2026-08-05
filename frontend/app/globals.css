@@ -948,6 +948,140 @@ textarea {
   height: 115px;
 }
 
+/* ─── 3D MEDAL (rank 2 / 3 hanging indicator) ─── */
+.podium-rank-medal {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.4));
+  margin-top: -8px;
+}
+
+.podium-medal-tilt {
+  perspective: 520px;
+}
+
+.podium-medal-svg {
+  display: block;
+  transform-style: preserve-3d;
+  transition: transform 120ms ease-out;
+  will-change: transform;
+}
+
+/* ─── SCROLLYTELLING HERO ─── */
+.podium-hero-glow {
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  width: min(760px, 80vw);
+  height: min(760px, 80vw);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(74, 222, 128, 0.28) 0%, rgba(45, 212, 191, 0.12) 40%, transparent 68%);
+  filter: blur(30px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.podium-hero-title {
+  position: absolute;
+  top: clamp(24px, 8vh, 96px);
+  left: 50%;
+  transform-origin: top center;
+  translate: -50% 0;
+  text-align: center;
+  z-index: 4;
+  pointer-events: none;
+  width: min(900px, 92vw);
+}
+
+.podium-hero-eyebrow {
+  display: block;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  color: var(--green-deep);
+  margin-bottom: 10px;
+}
+
+.podium-hero-title h2 {
+  margin: 0;
+  font-size: clamp(1.9rem, 4.6vw, 3.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  color: var(--text-strong);
+}
+
+.podium-hero-champion {
+  background: linear-gradient(100deg, #4ADE80, #2DD4BF 55%, #60A5FA);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.podium-scroll-hint {
+  position: absolute;
+  bottom: clamp(20px, 5vh, 56px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.podium-scroll-mouse {
+  width: 22px;
+  height: 34px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  position: relative;
+}
+
+.podium-scroll-mouse::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 3px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--green-deep);
+  transform: translateX(-50%);
+  animation: scrollDot 1.6s ease-in-out infinite;
+}
+
+@keyframes scrollDot {
+  0% { opacity: 0; transform: translate(-50%, 0); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, 12px); }
+}
+
+.podium-crown-float {
+  animation: crownFloat 2.6s ease-in-out infinite;
+}
+
+@keyframes crownFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .podium-crown-float {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .podium-scroll-mouse::after {
+    animation: none;
+  }
+}
+
 /* ─── NAME ─── */
 .podium-name {
   max-width: 80%;
@@ -1256,6 +1390,75 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+.admin-basket {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px 20px 20px;
+  margin: 0;
+}
+
+.admin-basket legend {
+  padding: 0 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-strong);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.basket-weight {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--green);
+  background: var(--color-waste-soft);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.admin-basket-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-check {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  grid-column: span 2;
+}
+
+.admin-check input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  padding: 0;
+  accent-color: var(--green);
+}
+
+.admin-check span {
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 0.9rem !important;
+  color: var(--text) !important;
+}
+
+@media (max-width: 640px) {
+  .admin-basket-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-check {
+    grid-column: span 1;
+  }
 }
 
 .hostel-data-grid {

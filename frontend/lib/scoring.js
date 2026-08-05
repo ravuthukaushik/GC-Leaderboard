@@ -1,103 +1,136 @@
-import { PLACEMENT_POINTS, SEGREGATION_POINTS } from "@/lib/constants";
+import { BASKET_WEIGHTS, BASKET_MAX, eventPerformancePoints } from "@/lib/constants";
 import { round } from "@/lib/utils";
 
-function assignPlacementPoints(entries, accessor, placementPoints, direction = "asc") {
-  const sorted = [...entries].sort((left, right) => {
-    const leftValue = accessor(left);
-    const rightValue = accessor(right);
-
-    if (direction === "desc") {
-      return rightValue - leftValue;
-    }
-
-    return leftValue - rightValue;
-  });
-
-  const pointsMap = new Map();
-
-  sorted.forEach((entry, index) => {
-    pointsMap.set(entry.hostelId, placementPoints[index] ?? 0);
-  });
-
-  return pointsMap;
+function num(value, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function assignSegregationPoints(entries) {
-  const statusPriority = {
-    segregated: 0,
-    partial: 1,
-    not_segregated: 2
-  };
-
-  const sorted = [...entries].sort(
-    (left, right) => statusPriority[left.segregationStatus] - statusPriority[right.segregationStatus],
-  );
-
-  const pointsMap = new Map();
-
-  sorted.forEach((entry, index) => {
-    const placementScore = PLACEMENT_POINTS.segregation[index] ?? 0;
-    const fallbackStatusScore = SEGREGATION_POINTS[entry.segregationStatus] || 0;
-    pointsMap.set(entry.hostelId, Math.min(placementScore, fallbackStatusScore));
-  });
-
-  return pointsMap;
+function bool(value) {
+  return value === true || value === 1 || value === "true" ? 1 : 0;
 }
 
-function eventPoints(count) {
-  // Treat 2 or more events as full score to avoid leaving "exactly 2" undefined.
-  if (count >= 2) return 20;
-  if (count >= 1) return 10;
-  return 0;
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+// Relative score for a "lower is better" per-capita metric.
+// The hostel with the smallest per-capita value scores 100; others scale down.
+function relativeLowestWins(perCapitaValues, ownValue) {
+  const positives = perCapitaValues.filter((value) => value > 0);
+  if (!positives.length || ownValue <= 0) return 0;
+  const minValue = Math.min(...positives);
+  return clamp((minValue / ownValue) * 100, 0, 100);
 }
 
 export function calculateWeeklyScores({ hostels, submissions, previousScoresByHostel = {} }) {
-  const normalized = submissions.map((entry) => ({
-    ...entry,
-    hostelId: entry.hostelId,
-    studentsInHostel: Math.max(entry.studentsInHostel || entry.hostelPopulation || 1, 1)
-  }));
+  const normalized = submissions.map((entry) => {
+    const students = Math.max(num(entry.studentsInHostel || entry.hostelPopulation, 1), 1);
+    const messEaters = Math.max(num(entry.messEatingStudents, students), 1);
 
-  const electricityRanks = assignPlacementPoints(
-    normalized,
-    (entry) => entry.electricityKwh,
-    PLACEMENT_POINTS.electricity,
-    "asc",
-  );
+    return {
+      ...entry,
+      studentsInHostel: students,
+      messEatingStudents: messEaters,
+      electricityPerStudent: num(entry.electricityKwh) / students,
+      messWastePerStudent: num(entry.messWasteKg) / messEaters
+    };
+  });
 
-  const wastedFoodRanks = assignPlacementPoints(
-    normalized,
-    (entry) => entry.wastedFoodKg,
-    PLACEMENT_POINTS.wastedFood,
-    "asc",
-  );
-
-  const hostelWasteRanks = assignPlacementPoints(
-    normalized,
-    (entry) => entry.hostelWasteKg,
-    PLACEMENT_POINTS.hostelWaste,
-    "asc",
-  );
-
-  const segregationRanks = assignSegregationPoints(normalized);
-
-  const orientationRanks = assignPlacementPoints(
-    normalized,
-    (entry) => entry.orientationAttendance,
-    PLACEMENT_POINTS.orientation,
-    "desc",
-  );
+  const electricityPerCapita = normalized.map((entry) => entry.electricityPerStudent);
+  const messPerCapita = normalized.map((entry) => entry.messWastePerStudent);
 
   const scores = normalized.map((entry) => {
-    const electricityScore = electricityRanks.get(entry.hostelId) || 0;
-    const wastedFoodScore = wastedFoodRanks.get(entry.hostelId) || 0;
-    const segregationScore = segregationRanks.get(entry.hostelId) || 0;
-    const hostelWasteScore = hostelWasteRanks.get(entry.hostelId) || 0;
-    const eventsScore = eventPoints(entry.eventsCount);
-    const orientationScore = orientationRanks.get(entry.hostelId) || 0;
-    const wasteScore = round(wastedFoodScore + segregationScore + hostelWasteScore);
-    const energyScore = round(eventsScore + orientationScore);
-    const totalScore = round(electricityScore + wasteScore + energyScore);
+    const students = entry.studentsInHostel;
+
+    // ── Electricity (15) ──
+    const electricityConsumptionScore = round(
+      (relativeLowestWins(electricityPerCapita, entry.electricityPerStudent) / 100) *
+        BASKET_WEIGHTS.electricity.consumption,
+    );
+    const electricityInitiativeScore = bool(entry.electricityInitiative)
+      ? BASKET_WEIGHTS.electricity.initiative
+      : 0;
+    const electricityScore = round(electricityConsumptionScore + electricityInitiativeScore);
+
+    // ── Water (15) ──
+    const waterMeterScore = bool(entry.waterMeterInstalled) ? BASKET_WEIGHTS.water.meter : 0;
+    const tanks = num(entry.waterTanks);
+    let sensorPercent;
+    if (bool(entry.overflowSensorInstalled)) {
+      sensorPercent = tanks > 0 ? (num(entry.workingOverflowSensors) / tanks) * 100 : 0;
+    } else {
+      // Penalty when no overflow sensor is installed: -1 per tank.
+      sensorPercent = -1 * tanks;
+    }
+    const waterSensorScore = round((clamp(sensorPercent, -100, 100) / 100) * BASKET_WEIGHTS.water.sensor);
+    const waterScore = round(waterMeterScore + waterSensorScore);
+
+    // ── Waste (20) ──
+    const messWasteScore = round(
+      (relativeLowestWins(messPerCapita, entry.messWastePerStudent) / 100) * BASKET_WEIGHTS.waste.mess,
+    );
+    const dustbinsTotal = num(entry.dustbinsTotal);
+    const segregationScore = round(
+      dustbinsTotal > 0
+        ? clamp(num(entry.dustbinsWithSignage) / dustbinsTotal, 0, 1) * BASKET_WEIGHTS.waste.segregation
+        : 0,
+    );
+    const wasteInitiativeScore = bool(entry.wasteReductionInitiative)
+      ? BASKET_WEIGHTS.waste.initiative
+      : 0;
+    const wasteScore = round(messWasteScore + segregationScore + wasteInitiativeScore);
+
+    // ── Representation (20) ──
+    const secretaryScore = bool(entry.sustainabilitySecretary)
+      ? BASKET_WEIGHTS.representation.secretary
+      : 0;
+    const meetingsTotal = num(entry.meetingsTotal);
+    const meetsScore = round(
+      meetingsTotal > 0
+        ? clamp(num(entry.meetingsAttended) / meetingsTotal, 0, 1) * BASKET_WEIGHTS.representation.meets
+        : 0,
+    );
+    const pilotScore = bool(entry.pilotInvolvement) ? BASKET_WEIGHTS.representation.pilot : 0;
+    const representationScore = round(secretaryScore + meetsScore + pilotScore);
+
+    // ── Events (20) ──
+    const performancePoints = eventPerformancePoints(entry.eventPlacement);
+    const participationPercent =
+      students > 0 ? clamp((num(entry.participatingStudents) / students) * 100, 0, 100) : 0;
+    // Sheet weights (performance + participation)/100 × 20; capped at the basket ceiling.
+    const eventsScore = round(
+      clamp(
+        ((performancePoints + participationPercent) / 100) * BASKET_WEIGHTS.events,
+        0,
+        BASKET_WEIGHTS.events,
+      ),
+    );
+
+    // ── Attendance (5) ──
+    const attendanceRatio = students > 0 ? clamp(num(entry.ocRepresentatives) / students, 0, 1) : 0;
+    const attendanceScore = round(attendanceRatio * BASKET_WEIGHTS.attendance);
+
+    // ── Extras (bonus) ──
+    const sopScore = round(num(entry.sopInitiatives) * BASKET_WEIGHTS.extras.sopPerInitiative);
+    const uniqueScore = round(Math.max(num(entry.uniqueInitiativePoints), 0));
+    const ganeshaScore = round(
+      students > 0
+        ? clamp(num(entry.ganeshaParticipants) / students, 0, 1) * BASKET_WEIGHTS.extras.ganesha
+        : 0,
+    );
+    const extrasScore = round(sopScore + uniqueScore + ganeshaScore);
+
+    const totalScore = round(
+      electricityScore +
+        waterScore +
+        wasteScore +
+        representationScore +
+        eventsScore +
+        attendanceScore +
+        extrasScore,
+    );
+
     const previousTotal = previousScoresByHostel[entry.hostelId]?.totalScore || 0;
     const momentumDelta = round(totalScore - previousTotal);
 
@@ -105,24 +138,42 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
       weekId: entry.weekId,
       hostelId: entry.hostelId,
       totalScore,
+      // basket totals
       electricityScore,
+      waterScore,
       wasteScore,
-      energyScore,
-      wastedFoodScore,
-      segregationScore,
-      hostelWasteScore,
+      representationScore,
       eventsScore,
-      orientationScore,
-      electricityPerStudent: round(entry.electricityKwh / entry.studentsInHostel, 3),
-      wastedFoodPerDiner: round(entry.wastedFoodKg, 3),
+      attendanceScore,
+      extrasScore,
+      // sub-scores (kept for transparency / analytics)
+      electricityConsumptionScore,
+      electricityInitiativeScore,
+      waterMeterScore,
+      waterSensorScore,
+      messWasteScore,
+      segregationScore,
+      wasteInitiativeScore,
+      secretaryScore,
+      meetsScore,
+      pilotScore,
+      sopScore,
+      uniqueScore,
+      ganeshaScore,
+      // derived per-capita figures
+      electricityPerStudent: round(entry.electricityPerStudent, 3),
+      messWastePerStudent: round(entry.messWastePerStudent, 3),
       momentumDelta,
       updatedAt: new Date().toISOString()
     };
   });
 
-  const topElectricity = [...scores].sort((a, b) => b.electricityScore - a.electricityScore)[0]?.hostelId;
-  const topWaste = [...scores].sort((a, b) => b.wasteScore - a.wasteScore)[0]?.hostelId;
-  const topEnergy = [...scores].sort((a, b) => b.energyScore - a.energyScore)[0]?.hostelId;
+  const topBy = (accessor) => [...scores].sort((a, b) => accessor(b) - accessor(a))[0]?.hostelId;
+  const topElectricity = topBy((s) => s.electricityScore);
+  const topWater = topBy((s) => s.waterScore);
+  const topWaste = topBy((s) => s.wasteScore);
+  const topRepresentation = topBy((s) => s.representationScore);
+  const topEvents = topBy((s) => s.eventsScore);
 
   return scores
     .sort((left, right) => right.totalScore - left.totalScore)
@@ -131,8 +182,10 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
       const badges = [];
 
       if (score.hostelId === topElectricity) badges.push("Electricity Saver");
+      if (score.hostelId === topWater) badges.push("Water Guardian");
       if (score.hostelId === topWaste) badges.push("Waste Warrior");
-      if (score.hostelId === topEnergy) badges.push("Engagement Champion");
+      if (score.hostelId === topRepresentation) badges.push("Representation Star");
+      if (score.hostelId === topEvents) badges.push("Events Champion");
       if (index === 0) badges.push("Overall Leader");
 
       return {
@@ -143,3 +196,5 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
       };
     });
 }
+
+export { BASKET_MAX };
