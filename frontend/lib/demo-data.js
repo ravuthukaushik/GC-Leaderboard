@@ -18,48 +18,83 @@ const hostels = [
 ].map(([id, name, population]) => ({ id, name, population }));
 
 const weeks = [
-  { id: "wk1", label: "Week 1 · Jan 06", startsOn: "2026-01-06" },
-  { id: "wk2", label: "Week 2 · Jan 13", startsOn: "2026-01-13" },
-  { id: "wk3", label: "Week 3 · Jan 20", startsOn: "2026-01-20" },
-  { id: "wk4", label: "Week 4 · Jan 27", startsOn: "2026-01-27" },
-  { id: "wk5", label: "Week 5 · Feb 03", startsOn: "2026-02-03" }
+  { id: "wk1", label: "Month 1 · Jan", startsOn: "2026-01-06" },
+  { id: "wk2", label: "Month 2 · Feb", startsOn: "2026-02-03" },
+  { id: "wk3", label: "Month 3 · Mar", startsOn: "2026-03-03" },
+  { id: "wk4", label: "Month 4 · Apr", startsOn: "2026-04-07" },
+  { id: "wk5", label: "Month 5 · May", startsOn: "2026-05-05" }
 ];
 
+// Per-hostel performance profile driving the demo submissions.
+// e = kWh per student, mw = mess waste kg per diner, quality 0..1 tunes the
+// binary/ratio metrics so the leaderboard shows a realistic spread.
 const performanceProfiles = {
-  h1: { e: 31.5, f: 0.12, hw: 95, ev: [0, 1, 1, 1, 1], oa: [40, 50, 48, 52, 55], s: "partial" },
-  h2: { e: 25, f: 0.082, hw: 62, ev: [1, 1, 2, 2, 2], oa: [58, 62, 66, 70, 72], s: "segregated" },
-  h3: { e: 28.6, f: 0.1, hw: 76, ev: [0, 1, 1, 2, 1], oa: [46, 48, 54, 56, 58], s: "partial" },
-  h4: { e: 29.4, f: 0.112, hw: 82, ev: [0, 0, 1, 1, 1], oa: [42, 44, 46, 48, 49], s: "partial" },
-  h5: { e: 22.8, f: 0.068, hw: 54, ev: [2, 2, 2, 2, 3], oa: [72, 78, 80, 84, 86], s: "segregated" },
-  h6: { e: 32.1, f: 0.12, hw: 98, ev: [0, 0, 0, 1, 1], oa: [34, 37, 40, 44, 46], s: "not_segregated" },
-  h7: { e: 27.2, f: 0.093, hw: 70, ev: [1, 1, 1, 1, 2], oa: [50, 52, 54, 59, 63], s: "segregated" },
-  h8: { e: 30.4, f: 0.105, hw: 74, ev: [0, 1, 1, 1, 1], oa: [48, 50, 51, 55, 56], s: "partial" },
-  h9: { e: 24.6, f: 0.078, hw: 60, ev: [1, 1, 2, 2, 2], oa: [60, 64, 66, 70, 74], s: "segregated" },
-  h10: { e: 26.8, f: 0.089, hw: 72, ev: [1, 1, 1, 2, 2], oa: [54, 56, 58, 60, 66], s: "segregated" },
-  h11: { e: 33.3, f: 0.125, hw: 102, ev: [0, 0, 1, 0, 0], oa: [30, 33, 35, 34, 36], s: "not_segregated" },
-  h12: { e: 26.1, f: 0.086, hw: 66, ev: [1, 1, 1, 2, 2], oa: [56, 60, 62, 66, 68], s: "segregated" },
-  h13: { e: 34.1, f: 0.132, hw: 108, ev: [0, 0, 0, 0, 1], oa: [28, 30, 31, 33, 35], s: "not_segregated" },
-  h14: { e: 25.8, f: 0.084, hw: 68, ev: [1, 1, 1, 2, 2], oa: [52, 55, 58, 63, 70], s: "segregated" }
+  h1: { e: 31.5, mw: 0.12, quality: 0.55, tanks: 5, place: [0, 3, 2, 2, 1] },
+  h2: { e: 25.0, mw: 0.082, quality: 0.88, tanks: 4, place: [2, 1, 1, 1, 1] },
+  h3: { e: 28.6, mw: 0.1, quality: 0.7, tanks: 5, place: [0, 2, 3, 2, 2] },
+  h4: { e: 29.4, mw: 0.112, quality: 0.62, tanks: 6, place: [0, 0, 4, 3, 3] },
+  h5: { e: 22.8, mw: 0.068, quality: 0.95, tanks: 4, place: [1, 1, 1, 1, 1] },
+  h6: { e: 32.1, mw: 0.12, quality: 0.4, tanks: 6, place: [0, 0, 0, 5, 4] },
+  h7: { e: 27.2, mw: 0.093, quality: 0.78, tanks: 5, place: [3, 2, 2, 2, 2] },
+  h8: { e: 30.4, mw: 0.105, quality: 0.6, tanks: 5, place: [0, 3, 3, 4, 3] },
+  h9: { e: 24.6, mw: 0.078, quality: 0.9, tanks: 4, place: [1, 1, 1, 1, 1] },
+  h10: { e: 26.8, mw: 0.089, quality: 0.82, tanks: 5, place: [2, 2, 2, 1, 2] },
+  h11: { e: 33.3, mw: 0.125, quality: 0.35, tanks: 7, place: [0, 0, 4, 0, 5] },
+  h12: { e: 26.1, mw: 0.086, quality: 0.84, tanks: 4, place: [2, 1, 2, 2, 1] },
+  h13: { e: 34.1, mw: 0.132, quality: 0.3, tanks: 7, place: [0, 0, 0, 0, 4] },
+  h14: { e: 25.8, mw: 0.084, quality: 0.86, tanks: 5, place: [2, 2, 1, 2, 1] }
 };
 
 const submissions = weeks.flatMap((week, weekIndex) =>
   hostels.map((hostel, hostelIndex) => {
     const profile = performanceProfiles[hostel.id];
+    const q = profile.quality;
     const oscillation = ((hostelIndex + weekIndex) % 3) - 1;
     const diners = Math.round(hostel.population * 0.82);
+    const dustbins = 6;
+    const meetingsTotal = 4;
 
     return {
       weekId: week.id,
       hostelId: hostel.id,
       hostelPopulation: hostel.population,
       studentsInHostel: hostel.population,
+
+      // Electricity
       electricityKwh: Number(((profile.e + weekIndex * 0.3 + oscillation * 0.2) * hostel.population).toFixed(1)),
-      wastedFoodKg: Number(((profile.f + weekIndex * -0.002 + oscillation * 0.001) * diners).toFixed(1)),
-      hostelWasteKg: Number((profile.hw + weekIndex * -2 + oscillation * 1.5).toFixed(1)),
-      messDiners: diners,
-      segregationStatus: profile.s,
-      eventsCount: profile.ev[weekIndex],
-      orientationAttendance: profile.oa[weekIndex],
+      electricityInitiative: q > 0.6,
+
+      // Water
+      waterMeterInstalled: q > 0.45,
+      overflowSensorInstalled: q > 0.5,
+      waterTanks: profile.tanks,
+      workingOverflowSensors: Math.min(profile.tanks, Math.round(profile.tanks * q)),
+
+      // Waste
+      messWasteKg: Number(((profile.mw + weekIndex * -0.002 + oscillation * 0.001) * diners).toFixed(1)),
+      messEatingStudents: diners,
+      dustbinsTotal: dustbins,
+      dustbinsWithSignage: Math.round(dustbins * q),
+      wasteReductionInitiative: q > 0.55,
+
+      // Representation
+      sustainabilitySecretary: q > 0.4,
+      meetingsTotal,
+      meetingsAttended: Math.min(meetingsTotal, Math.round(meetingsTotal * q) + (weekIndex % 2)),
+      pilotInvolvement: q > 0.7,
+
+      // Events
+      eventPlacement: profile.place[weekIndex],
+      participatingStudents: Math.round(hostel.population * (0.04 + q * 0.12)),
+
+      // Attendance
+      ocRepresentatives: Math.round(6 + q * 10),
+
+      // Extras
+      sopInitiatives: q > 0.8 ? 2 : q > 0.55 ? 1 : 0,
+      uniqueInitiativePoints: q > 0.85 ? 5 : q > 0.6 ? 3 : 0,
+      ganeshaParticipants: Math.round(hostel.population * (0.05 + q * 0.1)),
+
       notes: "Demo data"
     };
   }),

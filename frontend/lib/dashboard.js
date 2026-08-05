@@ -1,8 +1,52 @@
 import { getDemoDataset } from "@/lib/demo-data";
 import { calculateWeeklyScores } from "@/lib/scoring";
+import { DISPLAY_GROUPS } from "@/lib/constants";
 import { round } from "@/lib/utils";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+
+// Single source of truth mapping each editable input to its DB column + type.
+export const SUBMISSION_COLUMN_MAP = [
+  { column: "electricity_kwh", field: "electricityKwh", type: "number" },
+  { column: "electricity_initiative", field: "electricityInitiative", type: "bool" },
+  { column: "water_meter_installed", field: "waterMeterInstalled", type: "bool" },
+  { column: "overflow_sensor_installed", field: "overflowSensorInstalled", type: "bool" },
+  { column: "water_tanks", field: "waterTanks", type: "number" },
+  { column: "working_overflow_sensors", field: "workingOverflowSensors", type: "number" },
+  { column: "mess_waste_kg", field: "messWasteKg", type: "number" },
+  { column: "mess_eating_students", field: "messEatingStudents", type: "number" },
+  { column: "dustbins_total", field: "dustbinsTotal", type: "number" },
+  { column: "dustbins_with_signage", field: "dustbinsWithSignage", type: "number" },
+  { column: "waste_reduction_initiative", field: "wasteReductionInitiative", type: "bool" },
+  { column: "sustainability_secretary", field: "sustainabilitySecretary", type: "bool" },
+  { column: "meetings_attended", field: "meetingsAttended", type: "number" },
+  { column: "meetings_total", field: "meetingsTotal", type: "number" },
+  { column: "pilot_involvement", field: "pilotInvolvement", type: "bool" },
+  { column: "event_placement", field: "eventPlacement", type: "number" },
+  { column: "participating_students", field: "participatingStudents", type: "number" },
+  { column: "oc_representatives", field: "ocRepresentatives", type: "number" },
+  { column: "sop_initiatives", field: "sopInitiatives", type: "number" },
+  { column: "unique_initiative_points", field: "uniqueInitiativePoints", type: "number" },
+  { column: "ganesha_participants", field: "ganeshaParticipants", type: "number" }
+];
+
+// Every weekly input field the admin can edit, in submission (camelCase) form.
+export const SUBMISSION_FIELDS = SUBMISSION_COLUMN_MAP.map((item) => item.field);
+
+const BASKET_KEYS = [
+  "electricityScore",
+  "waterScore",
+  "wasteScore",
+  "representationScore",
+  "eventsScore",
+  "attendanceScore",
+  "extrasScore"
+];
+
+// Sum a set of basket scores into one of the three leaderboard display groups.
+function groupScore(source, group) {
+  return DISPLAY_GROUPS[group].reduce((sum, basket) => sum + Number(source[`${basket}Score`] || 0), 0);
+}
 
 function useDemoMode() {
   return !process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -30,14 +74,7 @@ function roleMeta(role) {
   const config = {
     admin: {
       label: "Admin",
-      editableFields: [
-        "electricityKwh",
-        "wastedFoodKg",
-        "segregationStatus",
-        "hostelWasteKg",
-        "eventsCount",
-        "orientationAttendance"
-      ]
+      editableFields: SUBMISSION_FIELDS
     },
     viewer: {
       label: "Viewer",
@@ -58,40 +95,27 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
   const latestScores = (scoresByWeek[activeWeek.id] || []).filter((score) =>
     visibleHostelIds.has(score.hostelId),
   );
+  const emptyAccumulator = (hostelId, name) => ({
+    hostelId,
+    name,
+    totalScore: 0,
+    weeksCount: 0,
+    momentumDelta: 0,
+    badges: [],
+    ...Object.fromEntries(BASKET_KEYS.map((key) => [key, 0]))
+  });
+
   const lifetimeMap = new Map(
-    visibleHostels.map((hostel) => [
-      hostel.id,
-      {
-        hostelId: hostel.id,
-        name: hostel.name,
-        totalScore: 0,
-        electricityScore: 0,
-        wasteScore: 0,
-        energyScore: 0,
-        weeksCount: 0,
-        momentumDelta: 0,
-        badges: []
-      }
-    ]),
+    visibleHostels.map((hostel) => [hostel.id, emptyAccumulator(hostel.id, hostel.name)]),
   );
 
   allScores.forEach((score) => {
-    const current = lifetimeMap.get(score.hostelId) || {
-      hostelId: score.hostelId,
-      name: score.hostelName,
-      totalScore: 0,
-      electricityScore: 0,
-      wasteScore: 0,
-      energyScore: 0,
-      weeksCount: 0,
-      momentumDelta: 0,
-      badges: []
-    };
+    const current = lifetimeMap.get(score.hostelId) || emptyAccumulator(score.hostelId, score.hostelName);
 
     current.totalScore += Number(score.totalScore || 0);
-    current.electricityScore += Number(score.electricityScore || 0);
-    current.wasteScore += Number(score.wasteScore || 0);
-    current.energyScore += Number(score.energyScore || 0);
+    BASKET_KEYS.forEach((key) => {
+      current[key] += Number(score[key] || 0);
+    });
     current.weeksCount += 1;
     lifetimeMap.set(score.hostelId, current);
   });
@@ -104,13 +128,16 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
   });
 
   const leaderboard = Array.from(lifetimeMap.values())
-    .map((score) => ({
-      ...score,
-      totalScore: round(score.weeksCount ? score.totalScore / score.weeksCount : 0),
-      electricityScore: round(score.weeksCount ? score.electricityScore / score.weeksCount : 0),
-      wasteScore: round(score.weeksCount ? score.wasteScore / score.weeksCount : 0),
-      energyScore: round(score.weeksCount ? score.energyScore / score.weeksCount : 0)
-    }))
+    .map((score) => {
+      const averaged = { ...score, totalScore: round(score.weeksCount ? score.totalScore / score.weeksCount : 0) };
+      BASKET_KEYS.forEach((key) => {
+        averaged[key] = round(score.weeksCount ? score[key] / score.weeksCount : 0);
+      });
+      // Grouped columns for the leaderboard table (Resources / Waste / Community).
+      averaged.resourcesScore = round(groupScore(averaged, "resources"));
+      averaged.communityScore = round(groupScore(averaged, "community"));
+      return averaged;
+    })
     .sort((left, right) => right.totalScore - left.totalScore)
     .map((score, index) => ({
       ...score,
@@ -147,26 +174,26 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
 
   const breakdown = leaderboard.map((item) => ({
     name: item.name.replace("Hostel ", "H"),
-    electricity: item.electricityScore,
+    resources: item.resourcesScore,
     waste: item.wasteScore,
-    energy: item.energyScore
+    community: item.communityScore
   }));
 
   const bestWaste = [...leaderboard].sort((a, b) => b.wasteScore - a.wasteScore)[0] || null;
-  const bestEnergy = [...leaderboard].sort((a, b) => b.energyScore - a.energyScore)[0] || null;
-  const electricityLeader = [...leaderboard].sort((a, b) => b.electricityScore - a.electricityScore)[0] || null;
+  const bestCommunity = [...leaderboard].sort((a, b) => b.communityScore - a.communityScore)[0] || null;
+  const resourcesLeader = [...leaderboard].sort((a, b) => b.resourcesScore - a.resourcesScore)[0] || null;
 
   const categoryLeaders = {
-    electricity: electricityLeader?.hostelId || null,
+    resources: resourcesLeader?.hostelId || null,
     waste: bestWaste?.hostelId || null,
-    events: bestEnergy?.hostelId || null
+    community: bestCommunity?.hostelId || null
   };
 
   leaderboard.forEach((entry) => {
     const badges = [];
-    if (entry.hostelId === categoryLeaders.electricity) badges.push("⚡ Electricity Leader");
+    if (entry.hostelId === categoryLeaders.resources) badges.push("⚡ Resources Leader");
     if (entry.hostelId === categoryLeaders.waste) badges.push("♻️ Waste Leader");
-    if (entry.hostelId === categoryLeaders.events) badges.push("📅 Events Leader");
+    if (entry.hostelId === categoryLeaders.community) badges.push("🤝 Community Leader");
     entry.categoryLeaderBadges = badges;
   });
 
@@ -196,24 +223,24 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
         label: "Waste performance",
         title: bestWaste ? `${bestWaste.name} owns the waste basket` : "Waste basket pending",
         description: bestWaste
-          ? `${bestWaste.name} currently has the strongest combined food waste, segregation, and hostel waste score.`
-          : "Waste metrics appear once THO/PHO data is entered."
+          ? `${bestWaste.name} currently has the strongest combined mess-waste, segregation, and initiative score.`
+          : "Waste metrics appear once mess data is entered."
       },
       {
-        label: "Events performance",
-        title: bestEnergy ? `${bestEnergy.name} is driving initiatives` : "Energy engagement pending",
-        description: bestEnergy
-          ? `${bestEnergy.name} is leading through events and orientation participation.`
-          : "Upload event and attendance data to reveal this insight."
+        label: "Community performance",
+        title: bestCommunity ? `${bestCommunity.name} is driving engagement` : "Community engagement pending",
+        description: bestCommunity
+          ? `${bestCommunity.name} is leading through representation, events, attendance, and extra initiatives.`
+          : "Upload representation, events, and attendance data to reveal this insight."
       },
       {
-        label: "Electricity efficiency",
-        title: electricityLeader
-          ? `${electricityLeader.name} is the electricity saver`
-          : "Electricity ranking pending",
-        description: electricityLeader
-          ? `${electricityLeader.name} currently leads the cumulative electricity basket.`
-          : "Electricity rankings will appear after the first weekly upload."
+        label: "Resource efficiency",
+        title: resourcesLeader
+          ? `${resourcesLeader.name} is the resource saver`
+          : "Resource ranking pending",
+        description: resourcesLeader
+          ? `${resourcesLeader.name} currently leads the combined electricity and water baskets.`
+          : "Resource rankings will appear after the first upload."
       }
     ],
     summary: {
@@ -271,8 +298,12 @@ async function getSupabaseDataset() {
         rank: score.rank,
         totalScore: score.total_score,
         electricityScore: score.electricity_score,
+        waterScore: score.water_score,
         wasteScore: score.waste_score,
-        energyScore: score.energy_score,
+        representationScore: score.representation_score,
+        eventsScore: score.events_score,
+        attendanceScore: score.attendance_score,
+        extrasScore: score.extras_score,
         momentumDelta: score.momentum_delta,
         badges: score.badges || []
       }));
@@ -393,32 +424,36 @@ export async function submitWeeklyEntry(entry, viewer) {
     return { ok: false, status: 403, error: "This account cannot edit weekly data." };
   }
 
+  const population = Number(hostelResponse.data.population ?? existing.students_in_hostel ?? 1);
+
   const submissionPayload = {
     week_id: entry.weekId,
     hostel_id: entry.hostelId,
-    electricity_kwh: fields.includes("electricityKwh")
-      ? Number(entry.electricityKwh ?? existing.electricity_kwh ?? 0)
-      : Number(existing.electricity_kwh ?? 0),
-    students_in_hostel: Number(hostelResponse.data.population ?? existing.students_in_hostel ?? 1),
-    wasted_food_kg: fields.includes("wastedFoodKg")
-      ? Number(entry.wastedFoodKg ?? existing.wasted_food_kg ?? 0)
-      : Number(existing.wasted_food_kg ?? 0),
-    hostel_waste_kg: fields.includes("hostelWasteKg")
-      ? Number(entry.hostelWasteKg ?? existing.hostel_waste_kg ?? 0)
-      : Number(existing.hostel_waste_kg ?? 0),
-    mess_diners: Number(existing.mess_diners ?? hostelResponse.data.population ?? 1),
-    segregation_status: fields.includes("segregationStatus")
-      ? entry.segregationStatus || existing.segregation_status || "not_segregated"
-      : existing.segregation_status || "not_segregated",
-    events_count: fields.includes("eventsCount")
-      ? Number(entry.eventsCount ?? existing.events_count ?? 0)
-      : Number(existing.events_count ?? 0),
-    orientation_attendance: fields.includes("orientationAttendance")
-      ? Number(entry.orientationAttendance ?? existing.orientation_attendance ?? 0)
-      : Number(existing.orientation_attendance ?? 0),
-    notes: entry.notes,
+    students_in_hostel: population > 0 ? population : 1,
+    notes: entry.notes ?? existing.notes ?? null,
     submitted_by: viewer.email || null
   };
+
+  // Coerce and merge each editable field with any existing stored value.
+  SUBMISSION_COLUMN_MAP.forEach(({ column, field, type }) => {
+    const editable = fields.includes(field);
+    const incoming = editable ? entry[field] : undefined;
+    const previous = existing[column];
+
+    if (type === "bool") {
+      const value = incoming ?? previous ?? false;
+      submissionPayload[column] = value === true || value === "true" || value === 1;
+    } else {
+      const raw = incoming ?? previous ?? 0;
+      const parsed = Number(raw);
+      submissionPayload[column] = Number.isFinite(parsed) ? parsed : 0;
+    }
+  });
+
+  // mess_eating_students falls back to the hostel population when unset.
+  if (!submissionPayload.mess_eating_students || submissionPayload.mess_eating_students < 1) {
+    submissionPayload.mess_eating_students = submissionPayload.students_in_hostel;
+  }
 
   const saveResponse = await admin
     .from("weekly_submissions")
@@ -514,19 +549,18 @@ export async function syncWeeklyScores(weekId) {
   }))
     .sort(numericHostelSort);
 
-  const submissions = submissionsResponse.data.map((item) => ({
-    weekId: item.week_id,
-    hostelId: item.hostel_id,
-    electricityKwh: item.electricity_kwh,
-    studentsInHostel: item.students_in_hostel,
-    wastedFoodKg: item.wasted_food_kg,
-    hostelWasteKg: item.hostel_waste_kg,
-    messDiners: item.mess_diners,
-    segregationStatus: item.segregation_status,
-    eventsCount: item.events_count,
-    orientationAttendance: item.orientation_attendance,
-    hostelPopulation: hostels.find((hostel) => hostel.id === item.hostel_id)?.population || 1
-  }));
+  const submissions = submissionsResponse.data.map((item) => {
+    const mapped = {
+      weekId: item.week_id,
+      hostelId: item.hostel_id,
+      studentsInHostel: item.students_in_hostel,
+      hostelPopulation: hostels.find((hostel) => hostel.id === item.hostel_id)?.population || 1
+    };
+    SUBMISSION_COLUMN_MAP.forEach(({ column, field }) => {
+      mapped[field] = item[column];
+    });
+    return mapped;
+  });
 
   const scores = calculateWeeklyScores({
     hostels,
@@ -539,15 +573,14 @@ export async function syncWeeklyScores(weekId) {
     rank: score.rank,
     total_score: score.totalScore,
     electricity_score: score.electricityScore,
+    water_score: score.waterScore,
     waste_score: score.wasteScore,
-    energy_score: score.energyScore,
-    wasted_food_score: score.wastedFoodScore,
-    segregation_score: score.segregationScore,
-    hostel_waste_score: score.hostelWasteScore,
+    representation_score: score.representationScore,
     events_score: score.eventsScore,
-    orientation_score: score.orientationScore,
+    attendance_score: score.attendanceScore,
+    extras_score: score.extrasScore,
     electricity_per_student: score.electricityPerStudent,
-    wasted_food_per_diner: score.wastedFoodPerDiner,
+    mess_waste_per_student: score.messWastePerStudent,
     momentum_delta: score.momentumDelta,
     badges: score.badges,
     updated_at: new Date().toISOString()
