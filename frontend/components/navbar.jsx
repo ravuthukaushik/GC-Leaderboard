@@ -9,8 +9,8 @@ export default function Navbar({ viewer, onSignOut }) {
   const isDepartmentUser = viewer?.isAdmin;
 
   return (
-    <div className="masthead-top">
-      <AppLogo compact />
+    <div className="topbar">
+      <AppLogo />
 
       <div className="masthead-meta">
         {isDepartmentUser ? (

@@ -1,12 +1,11 @@
-export default function AppLogo({ compact = false }) {
+export default function AppLogo() {
   return (
-    <div className={compact ? "brand-lockup compact" : "brand-lockup"} aria-label="Sustainability Cell">
-      <img
-        src="/suslogo-real.png"
-        alt="Sustainability Cell logo"
-        className={compact ? "brand-image compact" : "brand-image"}
-      />
-      <span className="brand-title">Sustainability Cell, IIT Bombay</span>
+    <div className="brand-lockup" aria-label="Sustainability Cell, IIT Bombay">
+      <img src="/suslogo-real.png" alt="" className="brand-image" />
+      <span className="brand-text">
+        <span className="brand-title">Sustainability Cell</span>
+        <span className="brand-sub">IIT Bombay</span>
+      </span>
     </div>
   );
 }
