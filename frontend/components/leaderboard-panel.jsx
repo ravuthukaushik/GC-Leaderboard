@@ -3,27 +3,6 @@
 import { motion } from "framer-motion";
 import RankBadge from "@/components/rank-badge";
 import BorderGlow from "@/components/BorderGlow";
-import PodiumCarousel from "@/components/podium-carousel";
-
-function CategoryBadges({ badges }) {
-  if (!badges || badges.length === 0) return null;
-
-  return (
-    <div className="hostel-meta-badges">
-      {badges.map((badge) => {
-        let cls = "category-badge";
-        if (badge.includes("Resources")) cls += " badge-electricity";
-        else if (badge.includes("Waste")) cls += " badge-waste";
-        else if (badge.includes("Community")) cls += " badge-events";
-        return (
-          <span key={badge} className={cls}>
-            {badge}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 function SegmentBar({ hostel }) {
   const segments = [
@@ -49,8 +28,6 @@ function SegmentBar({ hostel }) {
 }
 
 export default function LeaderboardPanel({ payload }) {
-  const top3 = payload.leaderboard.slice(0, 3);
-
   const rowVariants = {
     initial: {},
     animate: {
@@ -71,9 +48,6 @@ export default function LeaderboardPanel({ payload }) {
 
   return (
     <section className="panel-stack">
-      {/* ─── TOP-3 PODIUM ─── */}
-      {top3.length >= 3 && <PodiumCarousel top3={top3} />}
-
       {/* ─── LEADERBOARD TABLE ─── */}
       <BorderGlow
         className="table-panel"
@@ -100,7 +74,6 @@ export default function LeaderboardPanel({ payload }) {
           >
             <div className="leaderboard-head">
               <span>#</span>
-              <span></span>
               <span>Hostel</span>
               <span>Total</span>
               <span>Basket split</span>
@@ -126,14 +99,8 @@ export default function LeaderboardPanel({ payload }) {
                 whileHover={{ x: 4, scale: 1.005 }}
               >
                 <RankBadge rank={hostel.rank} />
-                <div className="hostel-avatar-small" aria-label={`${hostel.name} logo`} />
                 <div className="hostel-meta">
                   <strong>{hostel.name}</strong>
-                  {hostel.categoryLeaderBadges?.length > 0 ? (
-                    <CategoryBadges badges={hostel.categoryLeaderBadges} />
-                  ) : hostel.badges.length ? (
-                    <small>{hostel.badges.join(" · ")}</small>
-                  ) : null}
                 </div>
                 <strong className="score-value">{hostel.totalScore.toFixed(1)}</strong>
                 <SegmentBar hostel={hostel} />

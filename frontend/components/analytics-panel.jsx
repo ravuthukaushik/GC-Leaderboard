@@ -2,9 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Flame, Medal, Trophy } from "lucide-react";
 import BorderGlow from "@/components/BorderGlow";
-import { formatDelta } from "@/lib/utils";
 import {
   Bar,
   BarChart,
@@ -55,6 +53,20 @@ export default function AnalyticsPanel({ payload }) {
   const [leftHostel, setLeftHostel] = useState(payload.leaderboard[0]?.hostelId || "");
   const [rightHostel, setRightHostel] = useState(payload.leaderboard[1]?.hostelId || "");
 
+  // Hostels ordered numerically (1, 2, … 19, 21) for the compare dropdowns.
+  const hostelsByNumber = useMemo(
+    () =>
+      [...payload.leaderboard].sort((a, b) => {
+        const na = Number.parseInt(String(a.name).replace(/\D+/g, ""), 10);
+        const nb = Number.parseInt(String(b.name).replace(/\D+/g, ""), 10);
+        if (Number.isNaN(na) || Number.isNaN(nb)) {
+          return String(a.name).localeCompare(String(b.name), "en", { numeric: true });
+        }
+        return na - nb;
+      }),
+    [payload.leaderboard],
+  );
+
   const comparison = useMemo(() => {
     const left = payload.leaderboard.find((item) => item.hostelId === leftHostel);
     const right = payload.leaderboard.find((item) => item.hostelId === rightHostel);
@@ -69,77 +81,8 @@ export default function AnalyticsPanel({ payload }) {
     ];
   }, [leftHostel, payload.leaderboard, rightHostel]);
 
-  const summaryCards = [
-    {
-      label: "Participating Hostels",
-      value: payload.summary.hostelCount,
-      subtext: "In Green Cup",
-      icon: Trophy
-    },
-    {
-      label: "Leader",
-      value: payload.summary.leader?.name || "No data",
-      subtext: payload.summary.leader
-        ? `${payload.summary.leader.totalScore.toFixed(1)} average points`
-        : "waiting for weekly uploads",
-      accent: "green",
-      icon: Medal
-    },
-    {
-      label: "Average Points",
-      value: payload.summary.monthlyAverage.toFixed(1),
-      subtext: "Season Wide Average",
-      icon: BarChart3
-    },
-    {
-      label: "Biggest Climber",
-      value: payload.summary.biggestClimber?.name || "No change yet",
-      subtext: payload.summary.biggestClimber
-        ? formatDelta(payload.summary.biggestClimber.momentumDelta)
-        : "needs two weeks of data",
-      icon: Flame
-    }
-  ];
-
   return (
     <section className="panel-stack">
-      {/* ─── SUMMARY CARDS (relocated from leaderboard) ─── */}
-      <section className="card-grid">
-        {summaryCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <BorderGlow
-              key={card.label}
-              className="glow-surface"
-              edgeSensitivity={24}
-              glowColor="145 44 60"
-              backgroundColor="transparent"
-              borderRadius={22}
-              glowRadius={14}
-              glowIntensity={0.28}
-              coneSpread={22}
-              colors={card.accent ? ["#22C55E", "#3B82F6", "#4ADE80"] : ["#3B82F6", "#22C55E", "#60A5FA"]}
-              fillOpacity={0.08}
-            >
-              <motion.article
-                className={`summary-card${card.accent ? ` accent-${card.accent}` : ""}`}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                whileHover={{ y: -6, scale: 1.02 }}
-              >
-                <div className="summary-icon">
-                  <Icon size={18} />
-                </div>
-                <p className="summary-label">{card.label}</p>
-                <h2>{card.value}</h2>
-                <p className="summary-subtext">{card.subtext}</p>
-              </motion.article>
-            </BorderGlow>
-          );
-        })}
-      </section>
-
       {/* ─── CHARTS ─── */}
       <div className="chart-grid">
         <BorderGlow
@@ -279,7 +222,7 @@ export default function AnalyticsPanel({ payload }) {
             <label>
               <span>Hostel A</span>
               <select value={leftHostel} onChange={(event) => setLeftHostel(event.target.value)}>
-                {payload.leaderboard.map((hostel) => (
+                {hostelsByNumber.map((hostel) => (
                   <option key={hostel.hostelId} value={hostel.hostelId}>
                     {hostel.name}
                   </option>
@@ -290,7 +233,7 @@ export default function AnalyticsPanel({ payload }) {
             <label>
               <span>Hostel B</span>
               <select value={rightHostel} onChange={(event) => setRightHostel(event.target.value)}>
-                {payload.leaderboard.map((hostel) => (
+                {hostelsByNumber.map((hostel) => (
                   <option key={hostel.hostelId} value={hostel.hostelId}>
                     {hostel.name}
                   </option>

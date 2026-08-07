@@ -7,7 +7,7 @@ import AnalyticsPanel from "@/components/analytics-panel";
 import AdminPanel from "@/components/admin-panel";
 import HostelDataPanel from "@/components/hostel-data-panel";
 import JudgingCriteria from "@/components/judging-criteria";
-import BorderGlow from "@/components/BorderGlow";
+import PodiumCarousel from "@/components/podium-carousel";
 import { cx } from "@/lib/utils";
 
 export default function DashboardContent({
@@ -20,19 +20,14 @@ export default function DashboardContent({
 }) {
   const isDepartmentUser = viewer?.isAdmin;
   const isAdminUser = viewer?.role === "admin";
+  const podiumTop3 = payload.leaderboard.slice(0, 3);
+  const showPodium = podiumTop3.length >= 3 && (activeTab === "leaderboard" || activeTab === "analytics");
   const tabs = [
     { id: "leaderboard", label: "Leaderboard" },
     { id: "analytics", label: "Analytics" },
     ...(isAdminUser ? [{ id: "hostel-data", label: "Hostel Data" }] : []),
     ...(isDepartmentUser ? [{ id: "admin", label: "Admin" }] : [])
   ];
-
-  const tabGlowColors = {
-    leaderboard: ["#22C55E", "#3B82F6"],
-    analytics: ["#3B82F6", "#22C55E"],
-    "hostel-data": ["#22C55E", "#F59E0B"],
-    admin: ["#6366F1", "#3B82F6"]
-  };
 
   const contentVariants = {
     initial: { opacity: 0, y: 18 },
@@ -56,34 +51,34 @@ export default function DashboardContent({
       viewport={{ once: true, amount: 0.08 }}
       transition={{ duration: 0.48, ease: "easeInOut" }}
     >
-      <BorderGlow
-        className="masthead-panel"
-        borderRadius={32}
-        colors={["#22C55E", "#10B981"]}
-        backgroundColor="var(--glass-bg)"
-      >
-        <Navbar viewer={viewer} onSignOut={onSignOut} />
-      </BorderGlow>
+      <Navbar viewer={viewer} onSignOut={onSignOut} />
 
-      <section className="tab-row" aria-label="Dashboard tabs">
-        {tabs.map((tab) => (
-          <BorderGlow
-            key={tab.id}
-            className={cx("tab-glow-wrap", activeTab === tab.id && "tab-glow-active")}
-            borderRadius={12}
-            colors={tabGlowColors[tab.id] || ["#22C55E", "#3B82F6"]}
-            backgroundColor="var(--tab-bg)"
-          >
+      {showPodium ? <PodiumCarousel top3={podiumTop3} /> : null}
+
+      <nav className="segmented" role="tablist" aria-label="Dashboard views">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
             <button
+              key={tab.id}
               type="button"
-              className={cx("tab-button", activeTab === tab.id && "tab-active")}
+              role="tab"
+              aria-selected={isActive}
+              className={cx("segmented-item", isActive && "is-active")}
               onClick={() => setActiveTab(tab.id)}
             >
-              {tab.label}
+              {isActive ? (
+                <motion.span
+                  layoutId="segmented-active"
+                  className="segmented-indicator"
+                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                />
+              ) : null}
+              <span className="segmented-label">{tab.label}</span>
             </button>
-          </BorderGlow>
-        ))}
-      </section>
+          );
+        })}
+      </nav>
 
       <AnimatePresence mode="wait">
         {activeTab === "leaderboard" ? (
