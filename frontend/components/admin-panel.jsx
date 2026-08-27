@@ -8,17 +8,15 @@ import { Lock, UploadCloud } from "lucide-react";
 const FIELD_GROUPS = [
   {
     title: "Electricity",
-    weight: 15,
+    weight: 10,
     fields: [
-      { key: "electricityKwh", label: "Monthly electricity (kWh)", type: "number", step: "0.1", placeholder: "e.g. 12600" },
-      { key: "electricityInitiative", label: "Hostel-wide electricity initiative held", type: "bool" }
+      { key: "electricityKwh", label: "Monthly electricity (kWh)", type: "number", step: "0.1", placeholder: "e.g. 12600" }
     ]
   },
   {
     title: "Water",
-    weight: 15,
+    weight: 5,
     fields: [
-      { key: "waterMeterInstalled", label: "Water meter installed", type: "bool" },
       { key: "overflowSensorInstalled", label: "Overflow sensors installed", type: "bool" },
       { key: "waterTanks", label: "Number of water tanks", type: "number", step: "1", placeholder: "e.g. 5" },
       { key: "workingOverflowSensors", label: "Working overflow sensors", type: "number", step: "1", placeholder: "e.g. 4" }
@@ -26,10 +24,12 @@ const FIELD_GROUPS = [
   },
   {
     title: "Waste",
-    weight: 20,
+    weight: 30,
     fields: [
       { key: "messWasteKg", label: "Daily mess waste (kg)", type: "number", step: "0.1", placeholder: "e.g. 38" },
       { key: "messEatingStudents", label: "Mess-eating students", type: "number", step: "1", placeholder: "e.g. 336" },
+      { key: "foodWasteApp", label: "PHO Food Waste App used + staff trained", type: "bool" },
+      { key: "fourBinSegregation", label: "Four-bin mess segregation in place", type: "bool" },
       { key: "dustbinsTotal", label: "Total food-waste dustbins", type: "number", step: "1", placeholder: "e.g. 6" },
       { key: "dustbinsWithSignage", label: "Dustbins with proper signage", type: "number", step: "1", placeholder: "e.g. 5" },
       { key: "wasteReductionInitiative", label: "Waste-reduction initiative held", type: "bool" }
@@ -47,10 +47,11 @@ const FIELD_GROUPS = [
   },
   {
     title: "Events",
-    weight: 20,
+    weight: 30,
     fields: [
       { key: "eventPlacement", label: "Best placement (1 = winner, 0 = none)", type: "number", step: "1", placeholder: "1, 2, 3..." },
-      { key: "participatingStudents", label: "Students who participated", type: "number", step: "1", placeholder: "e.g. 48" }
+      { key: "participatingStudents", label: "Students who participated", type: "number", step: "1", placeholder: "e.g. 48" },
+      { key: "greenScoreUsers", label: "Residents who used Green Score Calculator", type: "number", step: "1", placeholder: "e.g. 60" }
     ]
   },
   {
@@ -65,8 +66,7 @@ const FIELD_GROUPS = [
     weight: null,
     fields: [
       { key: "sopInitiatives", label: "Approved SOP-listed initiatives (3 pts each)", type: "number", step: "1", placeholder: "e.g. 2" },
-      { key: "uniqueInitiativePoints", label: "New/unique initiative points (≤5 each)", type: "number", step: "0.5", placeholder: "e.g. 8" },
-      { key: "ganeshaParticipants", label: "Ganesha workshop participants", type: "number", step: "1", placeholder: "e.g. 40" }
+      { key: "uniqueInitiativePoints", label: "New/unique initiative points (≤5 each)", type: "number", step: "0.5", placeholder: "e.g. 8" }
     ]
   }
 ];

@@ -8,13 +8,13 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 // Single source of truth mapping each editable input to its DB column + type.
 export const SUBMISSION_COLUMN_MAP = [
   { column: "electricity_kwh", field: "electricityKwh", type: "number" },
-  { column: "electricity_initiative", field: "electricityInitiative", type: "bool" },
-  { column: "water_meter_installed", field: "waterMeterInstalled", type: "bool" },
   { column: "overflow_sensor_installed", field: "overflowSensorInstalled", type: "bool" },
   { column: "water_tanks", field: "waterTanks", type: "number" },
   { column: "working_overflow_sensors", field: "workingOverflowSensors", type: "number" },
   { column: "mess_waste_kg", field: "messWasteKg", type: "number" },
   { column: "mess_eating_students", field: "messEatingStudents", type: "number" },
+  { column: "food_waste_app", field: "foodWasteApp", type: "bool" },
+  { column: "four_bin_segregation", field: "fourBinSegregation", type: "bool" },
   { column: "dustbins_total", field: "dustbinsTotal", type: "number" },
   { column: "dustbins_with_signage", field: "dustbinsWithSignage", type: "number" },
   { column: "waste_reduction_initiative", field: "wasteReductionInitiative", type: "bool" },
@@ -24,10 +24,10 @@ export const SUBMISSION_COLUMN_MAP = [
   { column: "pilot_involvement", field: "pilotInvolvement", type: "bool" },
   { column: "event_placement", field: "eventPlacement", type: "number" },
   { column: "participating_students", field: "participatingStudents", type: "number" },
+  { column: "green_score_users", field: "greenScoreUsers", type: "number" },
   { column: "oc_representatives", field: "ocRepresentatives", type: "number" },
   { column: "sop_initiatives", field: "sopInitiatives", type: "number" },
-  { column: "unique_initiative_points", field: "uniqueInitiativePoints", type: "number" },
-  { column: "ganesha_participants", field: "ganeshaParticipants", type: "number" }
+  { column: "unique_initiative_points", field: "uniqueInitiativePoints", type: "number" }
 ];
 
 // Every weekly input field the admin can edit, in submission (camelCase) form.

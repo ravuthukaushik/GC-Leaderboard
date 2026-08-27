@@ -1,17 +1,18 @@
 // Green Cup scoring rubric — basket weightages.
-// Core baskets sum to 95; Ganesha Workshop (5) rounds the season out to 100,
-// while SOP-listed and new/unique initiatives are pure bonus points on top.
+// Core baskets sum to 100 (Electricity 10 + Water 5 + Waste 30 + Representation 20
+// + Events 30 + Attendance 5); SOP-listed and new/unique initiatives are pure
+// bonus points on top.
 export const BASKET_WEIGHTS = {
   electricity: {
-    consumption: 10, // relative, lowest per-capita consumption wins
-    initiative: 5 // binary: at least one hostel-wide initiative
+    consumption: 10 // relative, lowest per-capita consumption wins
   },
   water: {
-    meter: 10, // binary: water meter installed
     sensor: 5 // ratio of working overflow sensors to tanks (penalty if none)
   },
   waste: {
     mess: 10, // relative, lowest per-capita mess waste wins
+    foodWasteApp: 5, // binary: PHO Food Waste App used + staff trained
+    fourBin: 5, // binary: functional four-bin mess segregation
     segregation: 5, // ratio of dustbins with proper signage
     initiative: 5 // binary: at least one waste-reduction initiative
   },
@@ -20,26 +21,32 @@ export const BASKET_WEIGHTS = {
     meets: 10, // attendance ratio in sustainability-cell meets
     pilot: 5 // binary: at least one pilot/suggestion held per sem
   },
-  events: 20, // performance placement + participation percentage
+  events: {
+    participation: 25, // performance placement + participation percentage
+    greenScore: 5 // Green Score Calculator resident-usage percentage
+  },
   attendance: 5, // Green Cup OC attendance ratio
   extras: {
     sopPerInitiative: 3, // points per approved SOP-listed initiative
-    uniqueMaxPerInitiative: 5, // subjective, up to 5 per new/unique initiative
-    ganesha: 5 // Ganesha workshop participation percentage
+    uniqueMaxPerInitiative: 5 // subjective, up to 5 per new/unique initiative
   }
 };
 
 // Maximum score a single basket can contribute (used for segment-bar scaling).
 export const BASKET_MAX = {
-  electricity: BASKET_WEIGHTS.electricity.consumption + BASKET_WEIGHTS.electricity.initiative, // 15
-  water: BASKET_WEIGHTS.water.meter + BASKET_WEIGHTS.water.sensor, // 15
+  electricity: BASKET_WEIGHTS.electricity.consumption, // 10
+  water: BASKET_WEIGHTS.water.sensor, // 5
   waste:
-    BASKET_WEIGHTS.waste.mess + BASKET_WEIGHTS.waste.segregation + BASKET_WEIGHTS.waste.initiative, // 20
+    BASKET_WEIGHTS.waste.mess +
+    BASKET_WEIGHTS.waste.foodWasteApp +
+    BASKET_WEIGHTS.waste.fourBin +
+    BASKET_WEIGHTS.waste.segregation +
+    BASKET_WEIGHTS.waste.initiative, // 30
   representation:
     BASKET_WEIGHTS.representation.secretary +
     BASKET_WEIGHTS.representation.meets +
     BASKET_WEIGHTS.representation.pilot, // 20
-  events: BASKET_WEIGHTS.events, // 20
+  events: BASKET_WEIGHTS.events.participation + BASKET_WEIGHTS.events.greenScore, // 30
   attendance: BASKET_WEIGHTS.attendance // 5
 };
 

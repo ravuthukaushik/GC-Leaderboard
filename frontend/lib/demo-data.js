@@ -62,10 +62,8 @@ const submissions = weeks.flatMap((week, weekIndex) =>
 
       // Electricity
       electricityKwh: Number(((profile.e + weekIndex * 0.3 + oscillation * 0.2) * hostel.population).toFixed(1)),
-      electricityInitiative: q > 0.6,
 
       // Water
-      waterMeterInstalled: q > 0.45,
       overflowSensorInstalled: q > 0.5,
       waterTanks: profile.tanks,
       workingOverflowSensors: Math.min(profile.tanks, Math.round(profile.tanks * q)),
@@ -73,6 +71,8 @@ const submissions = weeks.flatMap((week, weekIndex) =>
       // Waste
       messWasteKg: Number(((profile.mw + weekIndex * -0.002 + oscillation * 0.001) * diners).toFixed(1)),
       messEatingStudents: diners,
+      foodWasteApp: q > 0.6,
+      fourBinSegregation: q > 0.65,
       dustbinsTotal: dustbins,
       dustbinsWithSignage: Math.round(dustbins * q),
       wasteReductionInitiative: q > 0.55,
@@ -86,6 +86,7 @@ const submissions = weeks.flatMap((week, weekIndex) =>
       // Events
       eventPlacement: profile.place[weekIndex],
       participatingStudents: Math.round(hostel.population * (0.04 + q * 0.12)),
+      greenScoreUsers: Math.round(hostel.population * (0.05 + q * 0.35)),
 
       // Attendance
       ocRepresentatives: Math.round(6 + q * 10),
@@ -93,7 +94,6 @@ const submissions = weeks.flatMap((week, weekIndex) =>
       // Extras
       sopInitiatives: q > 0.8 ? 2 : q > 0.55 ? 1 : 0,
       uniqueInitiativePoints: q > 0.85 ? 5 : q > 0.6 ? 3 : 0,
-      ganeshaParticipants: Math.round(hostel.population * (0.05 + q * 0.1)),
 
       notes: "Demo data"
     };

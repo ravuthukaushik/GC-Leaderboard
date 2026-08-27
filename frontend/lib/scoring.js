@@ -43,18 +43,14 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
   const scores = normalized.map((entry) => {
     const students = entry.studentsInHostel;
 
-    // ── Electricity (15) ──
+    // ── Electricity (10) ──
     const electricityConsumptionScore = round(
       (relativeLowestWins(electricityPerCapita, entry.electricityPerStudent) / 100) *
         BASKET_WEIGHTS.electricity.consumption,
     );
-    const electricityInitiativeScore = bool(entry.electricityInitiative)
-      ? BASKET_WEIGHTS.electricity.initiative
-      : 0;
-    const electricityScore = round(electricityConsumptionScore + electricityInitiativeScore);
+    const electricityScore = electricityConsumptionScore;
 
-    // ── Water (15) ──
-    const waterMeterScore = bool(entry.waterMeterInstalled) ? BASKET_WEIGHTS.water.meter : 0;
+    // ── Water (5) ──
     const tanks = num(entry.waterTanks);
     let sensorPercent;
     if (bool(entry.overflowSensorInstalled)) {
@@ -63,13 +59,14 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
       // Penalty when no overflow sensor is installed: -1 per tank.
       sensorPercent = -1 * tanks;
     }
-    const waterSensorScore = round((clamp(sensorPercent, -100, 100) / 100) * BASKET_WEIGHTS.water.sensor);
-    const waterScore = round(waterMeterScore + waterSensorScore);
+    const waterScore = round((clamp(sensorPercent, -100, 100) / 100) * BASKET_WEIGHTS.water.sensor);
 
-    // ── Waste (20) ──
+    // ── Waste (30) ──
     const messWasteScore = round(
       (relativeLowestWins(messPerCapita, entry.messWastePerStudent) / 100) * BASKET_WEIGHTS.waste.mess,
     );
+    const foodWasteAppScore = bool(entry.foodWasteApp) ? BASKET_WEIGHTS.waste.foodWasteApp : 0;
+    const fourBinScore = bool(entry.fourBinSegregation) ? BASKET_WEIGHTS.waste.fourBin : 0;
     const dustbinsTotal = num(entry.dustbinsTotal);
     const segregationScore = round(
       dustbinsTotal > 0
@@ -79,7 +76,9 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
     const wasteInitiativeScore = bool(entry.wasteReductionInitiative)
       ? BASKET_WEIGHTS.waste.initiative
       : 0;
-    const wasteScore = round(messWasteScore + segregationScore + wasteInitiativeScore);
+    const wasteScore = round(
+      messWasteScore + foodWasteAppScore + fourBinScore + segregationScore + wasteInitiativeScore,
+    );
 
     // ── Representation (20) ──
     const secretaryScore = bool(entry.sustainabilitySecretary)
@@ -94,18 +93,23 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
     const pilotScore = bool(entry.pilotInvolvement) ? BASKET_WEIGHTS.representation.pilot : 0;
     const representationScore = round(secretaryScore + meetsScore + pilotScore);
 
-    // ── Events (20) ──
+    // ── Events (30) ──
     const performancePoints = eventPerformancePoints(entry.eventPlacement);
     const participationPercent =
       students > 0 ? clamp((num(entry.participatingStudents) / students) * 100, 0, 100) : 0;
-    // Sheet weights (performance + participation)/100 × 20; capped at the basket ceiling.
-    const eventsScore = round(
+    // Individual participation: (performance + participation)/100 × 25, capped.
+    const eventsParticipationScore = round(
       clamp(
-        ((performancePoints + participationPercent) / 100) * BASKET_WEIGHTS.events,
+        ((performancePoints + participationPercent) / 100) * BASKET_WEIGHTS.events.participation,
         0,
-        BASKET_WEIGHTS.events,
+        BASKET_WEIGHTS.events.participation,
       ),
     );
+    // Green Score Calculator: residents who used it / total residents × 5.
+    const greenScorePercent =
+      students > 0 ? clamp((num(entry.greenScoreUsers) / students) * 100, 0, 100) : 0;
+    const greenScoreScore = round((greenScorePercent / 100) * BASKET_WEIGHTS.events.greenScore);
+    const eventsScore = round(eventsParticipationScore + greenScoreScore);
 
     // ── Attendance (5) ──
     const attendanceRatio = students > 0 ? clamp(num(entry.ocRepresentatives) / students, 0, 1) : 0;
@@ -114,12 +118,7 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
     // ── Extras (bonus) ──
     const sopScore = round(num(entry.sopInitiatives) * BASKET_WEIGHTS.extras.sopPerInitiative);
     const uniqueScore = round(Math.max(num(entry.uniqueInitiativePoints), 0));
-    const ganeshaScore = round(
-      students > 0
-        ? clamp(num(entry.ganeshaParticipants) / students, 0, 1) * BASKET_WEIGHTS.extras.ganesha
-        : 0,
-    );
-    const extrasScore = round(sopScore + uniqueScore + ganeshaScore);
+    const extrasScore = round(sopScore + uniqueScore);
 
     const totalScore = round(
       electricityScore +
@@ -148,18 +147,19 @@ export function calculateWeeklyScores({ hostels, submissions, previousScoresByHo
       extrasScore,
       // sub-scores (kept for transparency / analytics)
       electricityConsumptionScore,
-      electricityInitiativeScore,
-      waterMeterScore,
-      waterSensorScore,
+      waterSensorScore: waterScore,
       messWasteScore,
+      foodWasteAppScore,
+      fourBinScore,
       segregationScore,
       wasteInitiativeScore,
       secretaryScore,
       meetsScore,
       pilotScore,
+      eventsParticipationScore,
+      greenScoreScore,
       sopScore,
       uniqueScore,
-      ganeshaScore,
       // derived per-capita figures
       electricityPerStudent: round(entry.electricityPerStudent, 3),
       messWastePerStudent: round(entry.messWastePerStudent, 3),
