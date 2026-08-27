@@ -1187,6 +1187,29 @@ textarea {
   background: var(--tab-bg);
 }
 
+/* Medal-tinted pills for the top three — consistent with the podium */
+.rank-pill-gold,
+.rank-pill-silver,
+.rank-pill-bronze {
+  color: #10231a;
+  font-weight: 800;
+  border: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.rank-pill-gold {
+  background: linear-gradient(150deg, #fdeeb3 0%, #f2c64c 55%, #c08a1e 100%);
+}
+
+.rank-pill-silver {
+  background: linear-gradient(150deg, #f6f9fc 0%, #cbd5e1 55%, #8a97a6 100%);
+}
+
+.rank-pill-bronze {
+  background: linear-gradient(150deg, #f7cea3 0%, #d28e54 55%, #93542a 100%);
+  color: #2a1408;
+}
+
 /* ─── HOSTEL META (TABLE) ─── */
 .hostel-meta {
   display: grid;
