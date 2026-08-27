@@ -29,19 +29,19 @@ create table if not exists public.weekly_submissions (
   hostel_id text not null references public.hostels(id) on delete cascade,
   students_in_hostel integer not null default 1 check (students_in_hostel > 0),
 
-  -- Electricity basket (15)
+  -- Electricity basket (10)
   electricity_kwh numeric not null default 0 check (electricity_kwh >= 0),
-  electricity_initiative boolean not null default false,
 
-  -- Water basket (15)
-  water_meter_installed boolean not null default false,
+  -- Water basket (5)
   overflow_sensor_installed boolean not null default false,
   water_tanks integer not null default 0 check (water_tanks >= 0),
   working_overflow_sensors integer not null default 0 check (working_overflow_sensors >= 0),
 
-  -- Waste basket (20)
+  -- Waste basket (30)
   mess_waste_kg numeric not null default 0 check (mess_waste_kg >= 0),
   mess_eating_students integer not null default 1 check (mess_eating_students > 0),
+  food_waste_app boolean not null default false,
+  four_bin_segregation boolean not null default false,
   dustbins_total integer not null default 0 check (dustbins_total >= 0),
   dustbins_with_signage integer not null default 0 check (dustbins_with_signage >= 0),
   waste_reduction_initiative boolean not null default false,
@@ -52,9 +52,10 @@ create table if not exists public.weekly_submissions (
   meetings_total integer not null default 0 check (meetings_total >= 0),
   pilot_involvement boolean not null default false,
 
-  -- Events basket (20)
+  -- Events basket (30)
   event_placement integer not null default 0 check (event_placement >= 0),
   participating_students integer not null default 0 check (participating_students >= 0),
+  green_score_users integer not null default 0 check (green_score_users >= 0),
 
   -- Attendance basket (5)
   oc_representatives integer not null default 0 check (oc_representatives >= 0),
@@ -62,7 +63,6 @@ create table if not exists public.weekly_submissions (
   -- Extras (bonus)
   sop_initiatives integer not null default 0 check (sop_initiatives >= 0),
   unique_initiative_points numeric not null default 0 check (unique_initiative_points >= 0),
-  ganesha_participants integer not null default 0 check (ganesha_participants >= 0),
 
   notes text,
   submitted_by text,

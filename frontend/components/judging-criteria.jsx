@@ -10,22 +10,22 @@ const criteria = [
     parameter: "Electricity",
     source: "EMD",
     scoring:
-      "Consumption (10): relative — lowest per-capita monthly consumption scores highest\nHostel-wide initiative (5): 5 if at least one verified initiative, else 0",
-    weight: "15"
+      "Consumption (10): relative — lowest per-capita monthly consumption scores highest",
+    weight: "10"
   },
   {
     parameter: "Water",
     source: "Hostel / Sustainability Cell",
     scoring:
-      "Water meter installed (10): 10 if yes, 0 if no\nOverflow sensors (5): ratio of working sensors to tanks; penalty when none installed",
-    weight: "15"
+      "Overflow sensors (5): ratio of working sensors to tanks; penalty when none installed",
+    weight: "5"
   },
   {
     parameter: "Waste",
     source: "PHO",
     scoring:
-      "Mess waste (10): relative — lowest per-capita mess waste scores highest\nSegregation signage (5): share of dustbins with proper signage\nWaste-reduction initiative (5): 5 if at least one, else 0",
-    weight: "20"
+      "Mess waste (10): relative — lowest per-capita mess waste scores highest\nFood Waste App + staff training (5): 5 if app used regularly, else 0\nFour-bin mess segregation (5): 5 if implemented, else 0\nSegregation signage (5): share of dustbins with proper signage\nWaste-reduction initiative (5): 5 if at least one, else 0",
+    weight: "30"
   },
   {
     parameter: "Representation",
@@ -38,8 +38,8 @@ const criteria = [
     parameter: "Events (Individual Participation)",
     source: "Sustainability Cell",
     scoring:
-      "Performance: Winner 100, Runner-up 90, then -10 per placement\nParticipation: participating students / total students × 100\nWeighted to the 20-point basket",
-    weight: "20"
+      "Individual participation (25): performance (Winner 100, -10 per placement) + participation % , weighted to 25\nGreen Score Calculator (5): residents who used it / total residents × 5",
+    weight: "30"
   },
   {
     parameter: "Attendance (GC Opening Ceremony)",
@@ -51,7 +51,7 @@ const criteria = [
     parameter: "Extras",
     source: "Impact reports + valid proofs",
     scoring:
-      "SOP-listed initiatives: 3 points each\nNew/unique initiatives: up to 5 points each (subjective)\nGanesha workshop: participation percentage, scaled to 5 points",
+      "SOP-listed initiatives: 3 points each\nNew/unique initiatives: up to 5 points each (subjective)",
     weight: "Bonus"
   }
 ];
