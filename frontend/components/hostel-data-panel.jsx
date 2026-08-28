@@ -45,7 +45,7 @@ export default function HostelDataPanel({ payload, onSubmitted }) {
         return;
       }
 
-      setMessage("Hostel data updated. Future weekly calculations will use the saved student counts.");
+      setMessage("Hostel data updated. Future monthly calculations will use the saved student counts.");
       onSubmitted();
     });
   };

@@ -1,8 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import RankBadge from "@/components/rank-badge";
 import BorderGlow from "@/components/BorderGlow";
+
+if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
 function SegmentBar({ hostel }) {
   const segments = [
@@ -14,12 +18,9 @@ function SegmentBar({ hostel }) {
   return (
     <div className="segment-bar" aria-label={`${hostel.name} score basket`}>
       {segments.map((segment) => (
-        <motion.span
+        <span
           key={segment.label}
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.max(segment.value, 4)}%` }}
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-          style={{ background: segment.color }}
+          style={{ width: `${Math.max(segment.value, 4)}%`, background: segment.color }}
           title={`${segment.label}: ${segment.value.toFixed(1)}`}
         />
       ))}
@@ -28,50 +29,54 @@ function SegmentBar({ hostel }) {
 }
 
 export default function LeaderboardPanel({ payload }) {
-  const rowVariants = {
-    initial: {},
-    animate: {
-      transition: {
-        staggerChildren: 0.04
-      }
-    }
-  };
+  const rootRef = useRef(null);
 
-  const itemVariants = {
-    initial: { opacity: 0, x: -12 },
-    animate: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.32, ease: "easeInOut" }
+  // Rows fade/slide in with a short stagger as the table scrolls into view
+  // (GSAP ScrollTrigger). A last-resort safety net reveals them if the ticker is
+  // ever throttled so the table can never be stranded hidden.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    const rows = root.querySelectorAll(".leaderboard-row");
+    const settle = () => gsap.set(rows, { opacity: 1, y: 0, clearProps: "transform" });
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || !rows.length) {
+      settle();
+      return undefined;
     }
-  };
+    gsap.set(rows, { opacity: 0, y: 12 });
+    const st = ScrollTrigger.create({
+      trigger: root,
+      start: "top 82%",
+      once: true,
+      onEnter: () => gsap.to(rows, { opacity: 1, y: 0, duration: 0.5, stagger: 0.045, ease: "power2.out" })
+    });
+    const safety = window.setTimeout(() => {
+      if (rows[0] && getComputedStyle(rows[0]).opacity === "0") settle();
+    }, 8000);
+    return () => {
+      window.clearTimeout(safety);
+      st.kill();
+      settle();
+    };
+  }, [payload]);
 
   return (
-    <section className="panel-stack">
-      {/* ─── LEADERBOARD TABLE ─── */}
+    <section className="panel-stack" ref={rootRef}>
       <BorderGlow
         className="table-panel"
         borderRadius={28}
-        colors={["#22C55E", "#3B82F6"]}
+        colors={["#2F7A50", "#C9A227"]}
         backgroundColor="var(--glass-bg)"
       >
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
-        >
+        <div>
           <div className="panel-heading">
             <div>
               <h3>Green Cup Leaderboard</h3>
             </div>
           </div>
 
-          <motion.div
-            className="leaderboard-table"
-            variants={rowVariants}
-            initial="initial"
-            animate="animate"
-          >
+          <div className="leaderboard-table">
             <div className="leaderboard-head">
               <span>#</span>
               <span>Hostel</span>
@@ -92,12 +97,7 @@ export default function LeaderboardPanel({ payload }) {
             </div>
 
             {payload.leaderboard.map((hostel) => (
-              <motion.article
-                key={hostel.hostelId}
-                className="leaderboard-row"
-                variants={itemVariants}
-                whileHover={{ x: 4, scale: 1.005 }}
-              >
+              <article key={hostel.hostelId} className="leaderboard-row">
                 <RankBadge rank={hostel.rank} />
                 <div className="hostel-meta">
                   <strong>{hostel.name}</strong>
@@ -107,10 +107,10 @@ export default function LeaderboardPanel({ payload }) {
                 <span>{hostel.resourcesScore.toFixed(1)}</span>
                 <span>{hostel.wasteScore.toFixed(1)}</span>
                 <span>{hostel.communityScore.toFixed(1)}</span>
-              </motion.article>
+              </article>
             ))}
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </BorderGlow>
     </section>
   );

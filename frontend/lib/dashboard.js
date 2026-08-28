@@ -167,9 +167,11 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
     return row;
   });
 
+  // Restrained, distinct ramp aligned to the design palette (blue · green · clay
+  // · plum · rose) so the trend lines read as one system, not neon spaghetti.
   const trendSeries = trendHostels.map((name, index) => ({
     key: name,
-    color: ["#2ec27e", "#30a2ff", "#ff9f0a", "#b24adb", "#ff4f8b"][index % 5]
+    color: ["#3B7EA1", "#6A9E52", "#CD8551", "#8A6D9E", "#C56B7A"][index % 5]
   }));
 
   const breakdown = leaderboard.map((item) => ({
@@ -217,7 +219,7 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
         title: leader ? `${leader.name} is leading overall` : "No leaderboard yet",
         description: leader
           ? `${leader.name} tops the Green Cup with an average score of ${leader.totalScore.toFixed(1)}.`
-          : "Upload the first weekly dataset to unlock standings."
+          : "Upload the first monthly dataset to unlock standings."
       },
       {
         label: "Waste performance",
@@ -421,7 +423,7 @@ export async function submitWeeklyEntry(entry, viewer) {
   const fields = viewer.permissions?.editableFields || [];
 
   if (!fields.length) {
-    return { ok: false, status: 403, error: "This account cannot edit weekly data." };
+    return { ok: false, status: 403, error: "This account cannot edit monthly data." };
   }
 
   const population = Number(hostelResponse.data.population ?? existing.students_in_hostel ?? 1);

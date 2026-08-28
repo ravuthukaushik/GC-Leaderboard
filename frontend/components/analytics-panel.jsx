@@ -94,12 +94,12 @@ export default function AnalyticsPanel({ payload }) {
           glowRadius={14}
           glowIntensity={0.26}
           coneSpread={22}
-          colors={["#3B82F6", "#22C55E", "#4ADE80"]}
+          colors={["#3B7EA1", "#3D6B4F", "#6A9E52"]}
           fillOpacity={0.08}
         >
           <motion.article
             className="chart-card lifetime-chart-card"
-            initial={{ opacity: 0, y: 18 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
             whileHover={{ y: -4, scale: 1.02 }}
@@ -114,7 +114,12 @@ export default function AnalyticsPanel({ payload }) {
                 <LineChart data={payload.trends}>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="label" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
-                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
+                  <YAxis
+                    stroke="var(--chart-axis)"
+                    tick={{ fill: "var(--chart-axis)" }}
+                    allowDecimals={false}
+                    domain={[0, (dataMax) => Math.max(100, Math.ceil((dataMax || 0) / 10) * 10)]}
+                  />
                   <Tooltip content={<AnalyticsTooltip />} />
                   <Legend />
                   {payload.trendSeries.map((series) => (
@@ -144,19 +149,19 @@ export default function AnalyticsPanel({ payload }) {
           glowRadius={14}
           glowIntensity={0.26}
           coneSpread={22}
-          colors={["#22C55E", "#3B82F6", "#4ADE80"]}
+          colors={["#3D6B4F", "#3B7EA1", "#6A9E52"]}
           fillOpacity={0.08}
         >
           <motion.article
             className="chart-card snapshot-chart-card"
-            initial={{ opacity: 0, y: 18 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.08, ease: "easeInOut" }}
             whileHover={{ y: -4, scale: 1.02 }}
           >
             <div className="panel-heading">
               <div>
-                <h3>Current week basket contribution of each Hostel</h3>
+                <h3>Current month basket contribution of each Hostel</h3>
               </div>
             </div>
             <div className="chart-shell">
@@ -164,21 +169,21 @@ export default function AnalyticsPanel({ payload }) {
                 <BarChart data={payload.breakdown}>
                   <defs>
                     <linearGradient id="barElectricity" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#60A5FA" />
-                      <stop offset="100%" stopColor="#3B82F6" />
+                      <stop offset="0%" stopColor="#5296B8" />
+                      <stop offset="100%" stopColor="#3B7EA1" />
                     </linearGradient>
                     <linearGradient id="barWaste" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#4ADE80" />
-                      <stop offset="100%" stopColor="#22C55E" />
+                      <stop offset="0%" stopColor="#7DB169" />
+                      <stop offset="100%" stopColor="#6A9E52" />
                     </linearGradient>
                     <linearGradient id="barEvents" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#A78BFA" />
-                      <stop offset="100%" stopColor="#8B5CF6" />
+                      <stop offset="0%" stopColor="#DBA070" />
+                      <stop offset="100%" stopColor="#CD8551" />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="name" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
-                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
+                  <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} allowDecimals={false} domain={[0, 100]} />
                   <Tooltip content={<AnalyticsTooltip />} cursor={false} />
                   <Legend />
                   <Bar dataKey="resources" stackId="a" fill="url(#barElectricity)" isAnimationActive animationDuration={380} name="Resources" />
@@ -201,12 +206,12 @@ export default function AnalyticsPanel({ payload }) {
         glowRadius={14}
         glowIntensity={0.28}
         coneSpread={24}
-        colors={["#3B82F6", "#4ADE80", "#22C55E"]}
+        colors={["#3B7EA1", "#6A9E52", "#3D6B4F"]}
         fillOpacity={0.08}
       >
         <motion.section
           className="compare-card battle-mode-card"
-          initial={{ opacity: 0, y: 18 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.42, ease: "easeInOut" }}
           whileHover={{ y: -4, scale: 1.01 }}
@@ -247,17 +252,17 @@ export default function AnalyticsPanel({ payload }) {
               <BarChart data={comparison}>
                 <defs>
                   <linearGradient id="compareLeft" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#4ADE80" />
-                    <stop offset="100%" stopColor="#22C55E" />
+                    <stop offset="0%" stopColor="#4E8A66" />
+                    <stop offset="100%" stopColor="#3D6B4F" />
                   </linearGradient>
                   <linearGradient id="compareRight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#60A5FA" />
-                    <stop offset="100%" stopColor="#3B82F6" />
+                    <stop offset="0%" stopColor="#5296B8" />
+                    <stop offset="100%" stopColor="#3B7EA1" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
                 <XAxis dataKey="metric" stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} />
-                <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} domain={[0, 100]} />
+                <YAxis stroke="var(--chart-axis)" tick={{ fill: "var(--chart-axis)" }} allowDecimals={false} domain={[0, 100]} />
                 <Tooltip content={<AnalyticsTooltip />} cursor={false} />
                 <Legend />
                 {comparison[0]

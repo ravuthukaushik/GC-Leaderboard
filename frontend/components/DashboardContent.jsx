@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
 import Navbar from "@/components/navbar";
 import LeaderboardPanel from "@/components/leaderboard-panel";
 import AnalyticsPanel from "@/components/analytics-panel";
@@ -29,33 +30,35 @@ export default function DashboardContent({
     ...(isDepartmentUser ? [{ id: "admin", label: "Admin" }] : [])
   ];
 
-  const contentVariants = {
-    initial: { opacity: 0, y: 18 },
-    animate: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.45, ease: "easeInOut" }
-    },
-    exit: {
-      opacity: 0,
-      y: 12,
-      transition: { duration: 0.28, ease: "easeInOut" }
+  const navRef = useRef(null);
+  const indicatorRef = useRef(null);
+  const mountedRef = useRef(false);
+
+  // GSAP-driven sliding active indicator (measures the active tab and moves the
+  // single pill to it — smooth on change, instant on first paint).
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    const indicator = indicatorRef.current;
+    if (!nav || !indicator) return;
+    const active = nav.querySelector('[data-tab="' + activeTab + '"]');
+    if (!active) return;
+    const target = { x: active.offsetLeft, width: active.offsetWidth };
+    if (!mountedRef.current) {
+      gsap.set(indicator, { x: target.x, width: target.width, autoAlpha: 1 });
+      mountedRef.current = true;
+    } else {
+      gsap.to(indicator, { x: target.x, width: target.width, duration: 0.42, ease: "power3.out" });
     }
-  };
+  }, [activeTab, tabs.length]);
 
   return (
-    <motion.main
-      className="page-shell dashboard-content-shell"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.08 }}
-      transition={{ duration: 0.48, ease: "easeInOut" }}
-    >
+    <main className="page-shell dashboard-content-shell">
       <Navbar viewer={viewer} onSignOut={onSignOut} />
 
       {showPodium ? <PodiumCarousel top3={podiumTop3} /> : null}
 
-      <nav className="segmented" role="tablist" aria-label="Dashboard views">
+      <nav className="segmented" role="tablist" aria-label="Dashboard views" ref={navRef}>
+        <span className="segmented-indicator" ref={indicatorRef} aria-hidden="true" />
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -63,50 +66,29 @@ export default function DashboardContent({
               key={tab.id}
               type="button"
               role="tab"
+              data-tab={tab.id}
               aria-selected={isActive}
               className={cx("segmented-item", isActive && "is-active")}
               onClick={() => setActiveTab(tab.id)}
             >
-              {isActive ? (
-                <motion.span
-                  layoutId="segmented-active"
-                  className="segmented-indicator"
-                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                />
-              ) : null}
               <span className="segmented-label">{tab.label}</span>
             </button>
           );
         })}
       </nav>
 
-      <AnimatePresence mode="wait">
-        {activeTab === "leaderboard" ? (
-          <motion.div key="leaderboard" variants={contentVariants} initial="initial" animate="animate" exit="exit">
-            <LeaderboardPanel payload={payload} />
-          </motion.div>
-        ) : null}
-
-        {activeTab === "analytics" ? (
-          <motion.div key="analytics" variants={contentVariants} initial="initial" animate="animate" exit="exit">
-            <AnalyticsPanel payload={payload} />
-          </motion.div>
-        ) : null}
-
+      <div key={activeTab} className="tab-panel-reveal">
+        {activeTab === "leaderboard" ? <LeaderboardPanel payload={payload} /> : null}
+        {activeTab === "analytics" ? <AnalyticsPanel payload={payload} /> : null}
         {isAdminUser && activeTab === "hostel-data" ? (
-          <motion.div key="hostel-data" variants={contentVariants} initial="initial" animate="animate" exit="exit">
-            <HostelDataPanel payload={payload} onSubmitted={onRefresh} />
-          </motion.div>
+          <HostelDataPanel payload={payload} onSubmitted={onRefresh} />
         ) : null}
-
         {isDepartmentUser && activeTab === "admin" ? (
-          <motion.div key="admin" variants={contentVariants} initial="initial" animate="animate" exit="exit">
-            <AdminPanel payload={payload} viewer={viewer} onSubmitted={onRefresh} />
-          </motion.div>
+          <AdminPanel payload={payload} viewer={viewer} onSubmitted={onRefresh} />
         ) : null}
-      </AnimatePresence>
+      </div>
 
       <JudgingCriteria />
-    </motion.main>
+    </main>
   );
 }
