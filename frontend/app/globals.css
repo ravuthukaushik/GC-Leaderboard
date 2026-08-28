@@ -3,90 +3,116 @@
    Glassmorphism · Light/Dark Theme · Inter · Animated Backgrounds
    ==================================================================== */
 
-/* ─── DARK THEME (ONLY THEME) ─── */
+/* ─── LIGHT THEME · "Paper & Olive" ─── */
 :root {
-  /* Background */
-  --bg-orb-1: rgba(20, 184, 166, 0.32);
-  --bg-orb-2: rgba(16, 185, 129, 0.26);
-  --bg-orb-3: rgba(59, 130, 246, 0.24);
+  color-scheme: light;
 
-  /* Glass panel */
-  --glass-bg: rgba(3, 7, 18, 0.48);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-  --glass-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.6);
-  --glass-blur: 18px;
-  --glass-inset-highlight: rgba(255, 255, 255, 0.08);
-  --glass-sheen-color: rgba(255, 255, 255, 0.04);
+  /* Paper background family */
+  --paper: #FAF7F0;
+  --paper-2: #F1ECE0;
 
-  /* Text */
-  --text: #d1e0dc;
-  --text-strong: #f0f7f4;
-  --text-muted: #93aaa1;
+  /* Soft background washes (repurposed from old orbs) */
+  --bg-orb-1: rgba(47, 122, 80, 0.10);
+  --bg-orb-2: rgba(201, 162, 39, 0.08);
+  --bg-orb-3: rgba(46, 125, 147, 0.06);
+
+  /* Surfaces (glass tokens repurposed to solid light surfaces) */
+  --glass-bg: #FFFFFF;
+  --glass-border: rgba(35, 40, 31, 0.10);
+  --glass-shadow: 0 1px 2px rgba(64, 48, 27, 0.05), 0 18px 40px -26px rgba(64, 48, 27, 0.28);
+  --glass-shadow-hover: 0 2px 6px rgba(64, 48, 27, 0.07), 0 26px 56px -28px rgba(64, 48, 27, 0.34);
+  --glass-blur: 0px;
+  --glass-inset-highlight: rgba(255, 255, 255, 0);
+  --glass-sheen-color: rgba(255, 255, 255, 0);
+
+  /* Text (warm ink) */
+  --text: #3F463A;
+  --text-strong: #1E211D;
+  --text-muted: #7C8573;
 
   /* Borders */
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  --line: rgba(35, 40, 31, 0.10);
+  --line-strong: rgba(35, 40, 31, 0.16);
 
   /* Neutral surfaces (elevation ladder) */
-  --surface-1: rgba(255, 255, 255, 0.03);
-  --surface-2: rgba(255, 255, 255, 0.07);
+  --surface-1: #FBF9F2;
+  --surface-2: #EFEBDF;
 
-  /* Elevation shadows (calm, consistent) */
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.28), 0 10px 26px -18px rgba(0, 0, 0, 0.6);
-  --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.3), 0 20px 48px -24px rgba(0, 0, 0, 0.7);
+  /* Elevation shadows (calm, soft — no glass) */
+  --shadow-1: 0 1px 2px rgba(64, 48, 27, 0.05), 0 10px 24px -18px rgba(64, 48, 27, 0.22);
+  --shadow-2: 0 2px 5px rgba(64, 48, 27, 0.06), 0 22px 48px -26px rgba(64, 48, 27, 0.30);
 
   /* Focus */
-  --focus-ring: var(--green);
+  --focus-ring: var(--brand);
 
-  /* Category colors */
-  --color-electricity: #60A5FA;
-  --color-electricity-soft: rgba(96, 165, 250, 0.15);
-  --color-waste: #4ADE80;
-  --color-waste-soft: rgba(74, 222, 128, 0.15);
-  --color-events: #A78BFA;
-  --color-events-soft: rgba(167, 139, 250, 0.15);
+  /* Category / basket colours — restrained eco */
+  --color-electricity: #3B7EA1;              /* Resources · slate-teal */
+  --color-electricity-soft: rgba(59, 126, 161, 0.12);
+  --color-waste: #6A9E52;                     /* Waste · olive */
+  --color-waste-soft: rgba(106, 158, 82, 0.13);
+  --color-events: #CD8551;                    /* Community · terracotta */
+  --color-events-soft: rgba(205, 133, 81, 0.14);
 
-  /* Accents */
-  --green: #4ADE80;
-  --green-deep: #86efac;
+  /* Brand green — confident, used sparingly */
+  --brand: #3D6B4F;
+  --brand-deep: #2E5340;
+  --green: var(--brand);
+  --green-deep: var(--brand-deep);
 
-  /* Rank colors */
-  --rank-gold: linear-gradient(135deg, #fbbf24, #f59e0b);
-  --rank-silver: linear-gradient(135deg, #d1d5db, #9ca3af);
-  --rank-bronze: linear-gradient(135deg, #d97706, #b45309);
+  /* Medals — muted, real metals */
+  --metal-gold: #B8904A;
+  --metal-silver: #A9ADB3;
+  --metal-bronze: #B37A54;
+  --rank-gold: linear-gradient(150deg, #D6B67C, #B8904A);
+  --rank-silver: linear-gradient(150deg, #C9CDD2, #A9ADB3);
+  --rank-bronze: linear-gradient(150deg, #CE9A72, #B37A54);
 
   /* Components */
-  --input-bg: rgba(255, 255, 255, 0.05);
-  --input-border: rgba(255, 255, 255, 0.1);
-  --tab-bg: rgba(255, 255, 255, 0.04);
-  --tab-active-bg: rgba(255, 255, 255, 0.1);
-  --chip-bg: rgba(74, 222, 128, 0.1);
-  --chip-border: rgba(74, 222, 128, 0.15);
-  --chip-text: var(--green-deep);
-  --tooltip-bg: rgba(15, 30, 38, 0.96);
-  --tooltip-border: rgba(255, 255, 255, 0.1);
-  --tooltip-shadow: 0 18px 34px rgba(0, 0, 0, 0.4);
-  --chart-axis: #7a9990;
-  --chart-grid: rgba(255, 255, 255, 0.06);
-  --judging-head-bg: rgba(255, 255, 255, 0.08);
+  --input-bg: #FFFFFF;
+  --input-border: rgba(35, 40, 31, 0.14);
+  --tab-bg: #EFEBDF;
+  --tab-active-bg: #E4DFD0;
+  --chip-bg: rgba(47, 122, 80, 0.10);
+  --chip-border: rgba(47, 122, 80, 0.20);
+  --chip-text: var(--brand-deep);
+  --tooltip-bg: #FFFFFF;
+  --tooltip-border: rgba(35, 40, 31, 0.12);
+  --tooltip-shadow: 0 18px 40px -20px rgba(64, 48, 27, 0.32);
+  --chart-axis: #8A9280;
+  --chart-grid: rgba(35, 40, 31, 0.08);
+  --judging-head-bg: #EFEBDF;
   --judging-head-text: var(--text-strong);
-  --judging-alt-bg: rgba(255, 255, 255, 0.02);
-  --judging-hover-bg: rgba(74, 222, 128, 0.06);
+  --judging-alt-bg: #FBF9F2;
+  --judging-hover-bg: rgba(47, 122, 80, 0.06);
 
-  /* Gradients */
-  --btn-gradient: linear-gradient(135deg, #4ADE80, #60A5FA);
-  --btn-shadow: 0 10px 28px rgba(74, 222, 128, 0.15);
+  /* Buttons */
+  --btn-gradient: linear-gradient(140deg, #47795A, #2E5340);
+  --btn-shadow: 0 12px 26px -14px rgba(61, 107, 79, 0.5);
 
-  /* Layout — radius scale */
+  /* Radius scale */
   --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-lg: 18px;
   --radius-xl: 24px;
 
-  /* Typography */
-  --font-display: var(--font-inter, "Inter", "Segoe UI", sans-serif);
-  --font-body: var(--font-inter, "Inter", "Segoe UI", sans-serif);
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Typography — Inter throughout (display + body) */
+  --font-display: var(--font-inter, "Inter", system-ui, sans-serif);
+  --font-body: var(--font-inter, "Inter", system-ui, sans-serif);
+
+  /* Type scale (one system, applied everywhere) */
+  --fs-headline: clamp(2.2rem, 5vw, 3.4rem);  /* Fraunces hero */
+  --fs-title: 1.32rem;                          /* section title */
+  --fs-card: 1.05rem;                           /* card title */
+  --fs-body: 0.95rem;                           /* body */
+  --fs-data: 0.9rem;                            /* table / numeric */
+  --fs-label: 0.72rem;                          /* label / caption */
+  --lh-tight: 1.08;
+  --lh-snug: 1.25;
+  --lh-body: 1.55;
+  --tracking-label: 0.12em;
 }
 
 /* ─── RESET & BASE ─── */
@@ -101,9 +127,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(4, 14, 10, 0.78), rgba(2, 8, 6, 0.88)) fixed,
-    url("/leaves-bg.jpeg") center / cover no-repeat fixed;
+  background: var(--paper);
   color: var(--text);
   font-family: var(--font-body);
   font-feature-settings: "cv02", "cv03", "cv04";
@@ -113,102 +137,50 @@ body {
   overflow-x: hidden;
 }
 
+/* Fine paper grain — the "natural material" texture, kept very subtle. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+
+/* ─── AMBIENT BACKGROUND (slow-drifting washes; felt, not seen) ─── */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.ambient-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  will-change: transform;
+}
+.ambient-blob--1 {
+  width: 48vw; height: 48vw; left: -10vw; top: -8vw;
+  background: radial-gradient(circle, rgba(61, 107, 79, 0.06), transparent 68%);
+}
+.ambient-blob--2 {
+  width: 42vw; height: 42vw; right: -8vw; top: 6vh;
+  background: radial-gradient(circle, rgba(184, 144, 74, 0.055), transparent 68%);
+}
+.ambient-blob--3 {
+  width: 46vw; height: 46vw; left: 28vw; bottom: -16vh;
+  background: radial-gradient(circle, rgba(120, 150, 122, 0.05), transparent 70%);
+}
+
 /* Accessible, unobtrusive keyboard focus */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
   border-radius: 6px;
-}
-
-/* ─── ANIMATED BACKGROUND ORBS (Organic waves matching references) ─── */
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  pointer-events: none;
-  z-index: 0;
-  filter: blur(130px);
-  opacity: 0.9;
-}
-
-body::before {
-  width: 1200px;
-  height: 800px;
-  background: radial-gradient(circle, var(--bg-orb-1) 0%, transparent 70%);
-  top: -10%;
-  left: -10%;
-  transform: rotate(-15deg);
-  animation: darkAurora1 18s ease-in-out infinite;
-  filter: blur(160px);
-}
-
-body::after {
-  width: 1400px;
-  height: 850px;
-  background: radial-gradient(circle, var(--bg-orb-2) 0%, transparent 70%);
-  bottom: -15%;
-  right: -15%;
-  transform: rotate(-15deg);
-  animation: darkAurora2 22s ease-in-out infinite;
-  filter: blur(160px);
-}
-
-/* Third wave via page-level pseudo on shell */
-.page-shell::before {
-  content: "";
-  position: fixed;
-  width: 1300px;
-  height: 900px;
-  background: radial-gradient(circle, var(--bg-orb-3) 0%, transparent 70%);
-  top: 10%;
-  left: 45%;
-  transform: translateX(-50%) rotate(-15deg);
-  filter: blur(180px);
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.8;
-  animation: darkAurora3 20s ease-in-out infinite;
-}
-
-@keyframes darkAurora1 {
-  0%, 100% {
-    transform: translate(0, 0) rotate(-15deg) scale(1);
-    border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
-  }
-  33% {
-    transform: translate(120px, 90px) rotate(-10deg) scale(1.18);
-    border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%;
-  }
-  66% {
-    transform: translate(-90px, -60px) rotate(-20deg) scale(0.85);
-    border-radius: 50% 50% 40% 60% / 60% 50% 70% 40%;
-  }
-}
-
-@keyframes darkAurora2 {
-  0%, 100% {
-    transform: translate(0, 0) rotate(-15deg) scale(1);
-    border-radius: 60% 40% 60% 40% / 50% 50% 50% 50%;
-  }
-  33% {
-    transform: translate(-140px, 90px) rotate(-25deg) scale(1.12);
-    border-radius: 40% 60% 70% 30% / 60% 40% 60% 40%;
-  }
-  66% {
-    transform: translate(90px, -110px) rotate(-5deg) scale(0.92);
-    border-radius: 70% 30% 40% 60% / 40% 60% 50% 50%;
-  }
-}
-
-@keyframes darkAurora3 {
-  0%, 100% {
-    transform: translateX(-50%) translate(0, 0) rotate(-15deg) scale(1);
-    border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
-  }
-  50% {
-    transform: translateX(-50%) translate(150px, -150px) rotate(-5deg) scale(1.22);
-    border-radius: 30% 70% 55% 45% / 65% 35% 65% 35%;
-  }
 }
 
 a {
@@ -248,13 +220,8 @@ textarea {
 .auth-card {
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow:
-    inset 0 0 5px 1px var(--glass-inset-highlight),
-    0 0 15px rgba(255, 255, 255, 0.05),
-    var(--glass-shadow);
-  transition: transform 220ms ease, box-shadow 220ms ease;
+  box-shadow: var(--glass-shadow);
+  transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
   position: relative;
   overflow: hidden;
 }
@@ -267,10 +234,7 @@ textarea {
 .hostel-data-card:hover,
 .auth-card:hover {
   transform: translateY(-3px);
-  box-shadow:
-    inset 0 0 5px 1px var(--glass-inset-highlight),
-    0 0 20px rgba(255, 255, 255, 0.08),
-    var(--glass-shadow-hover);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .summary-card::before,
@@ -576,6 +540,7 @@ textarea {
 
 /* ─── SEGMENTED TAB CONTROL ─── */
 .segmented {
+  position: relative;
   display: flex;
   width: fit-content;
   max-width: 100%;
@@ -586,7 +551,6 @@ textarea {
   background: var(--surface-1);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-1);
-  overflow-x: auto;
   scrollbar-width: none;
 }
 
@@ -615,7 +579,7 @@ textarea {
 }
 
 .segmented-item.is-active {
-  color: var(--text-strong);
+  color: #ffffff;
 }
 
 .segmented-label {
@@ -623,14 +587,18 @@ textarea {
   z-index: 1;
 }
 
+/* Single GSAP-driven sliding pill (brand green). */
 .segmented-indicator {
   position: absolute;
-  inset: 0;
+  top: 5px;
+  bottom: 5px;
+  left: 0;
+  width: 0;
   z-index: 0;
+  visibility: hidden;
   border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-1);
+  background: var(--brand);
+  box-shadow: 0 8px 18px -8px rgba(61, 107, 79, 0.55);
 }
 
 /* ─── ADMIN LOGIN GLOW ─── */
@@ -771,7 +739,7 @@ textarea {
 
 .summary-label {
   margin: 14px 0 0;
-  color: #ffffff;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.72rem;
@@ -789,14 +757,16 @@ textarea {
 .insight-card h3,
 .locked-panel h3 {
   margin: 6px 0 0;
-  font-size: 1.32rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-title);
   color: var(--text-strong);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
 }
 
 .snapshot-chart-card .panel-heading h3,
 .lifetime-chart-card .panel-heading h3 {
-  color: #ffffff;
+  color: var(--text-strong);
 }
 
 /* ─── LEGEND ─── */
@@ -825,269 +795,264 @@ textarea {
   margin-top: 0;
 }
 
-/* ─── PODIUM CAROUSEL (scroll-driven circular rotation) ─── */
-/* ═══════════ PODIUM HERO — floating glass podium ═══════════ */
-.podium-hero {
+/* ═══════════ PODIUM — light award cards on plinths (GSAP-driven) ═══════════ */
+.gcp {
   position: relative;
-  padding: clamp(28px, 6vh, 72px) 0 clamp(20px, 4vh, 44px);
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: clamp(20px, 4vh, 48px) 0 clamp(14px, 3vh, 32px);
   isolation: isolate;
 }
 
-.podium-hero-ambient {
-  position: absolute;
-  top: 6%;
-  left: 50%;
-  width: min(820px, 92vw);
-  height: min(520px, 60vh);
-  transform: translateX(-50%);
-  background:
-    radial-gradient(60% 60% at 50% 40%, rgba(74, 222, 128, 0.15), transparent 70%),
-    radial-gradient(50% 50% at 70% 62%, rgba(45, 212, 191, 0.09), transparent 72%);
-  filter: blur(22px);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* ── Hero copy ── */
-.podium-hero-copy {
+.gcp__intro {
   text-align: center;
-  max-width: 620px;
-  margin-bottom: clamp(26px, 4vh, 44px);
+  margin-bottom: clamp(22px, 4vh, 42px);
 }
 
-.podium-hero-title {
+.gcp__eyebrow {
+  margin: 0 0 10px;
+  font-family: var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--brand-deep);
+}
+
+.gcp__title {
   margin: 0;
-  font-size: clamp(2.1rem, 5.4vw, 3.4rem);
+  font-family: var(--font-display);
   font-weight: 800;
+  font-size: var(--fs-headline);
+  line-height: var(--lh-tight);
   letter-spacing: -0.035em;
-  line-height: 1.04;
   color: var(--text-strong);
 }
 
-/* ── Stage ── */
-.podium-stage {
+.gcp__title em {
+  font-style: normal;
+  color: var(--brand);
+}
+
+/* Stage — 2nd · 1st · 3rd, centre tallest */
+.gcp__stage {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(12px, 1.8vw, 22px);
+  gap: clamp(10px, 1.6vw, 20px);
   width: min(760px, 96vw);
-  padding-bottom: 18px;
+  margin: 0;
+  padding: 0 0 6px;
+  list-style: none;
 }
 
-.podium-col {
+.gcp__col {
   position: relative;
   flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-end;
-  min-width: 0;
   will-change: transform, opacity;
 }
 
-.podium-col-1 {
-  flex-grow: 1.16;
+.gcp__col--1 {
+  flex-grow: 1.14;
   z-index: 2;
 }
 
-/* Wings sit behind the champion so they can reveal from behind it */
-.podium-col-2,
-.podium-col-3 {
-  z-index: 1;
+/* Spotlight bloom behind the champion card (soft green → gold) */
+.gcp__spotlight {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  width: 168%;
+  height: 118%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, rgba(61, 107, 79, 0.18), transparent 72%),
+    radial-gradient(closest-side, rgba(184, 144, 74, 0.1), transparent 66%);
+  filter: blur(8px);
 }
 
-/* Floor shadow — stays grounded while the tower lifts on hover */
-.podium-col::after {
+/* Grounded floor shadow */
+.gcp__col::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: -16px;
-  width: 78%;
-  height: 26px;
+  bottom: -14px;
+  width: 74%;
+  height: 20px;
   transform: translateX(-50%);
-  background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0.5), transparent 72%);
-  filter: blur(7px);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(64, 48, 27, 0.16), transparent 72%);
+  filter: blur(6px);
   z-index: -1;
   pointer-events: none;
 }
 
-/* ── The tower (card + pedestal lift together) ── */
-.podium-lift {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  will-change: transform;
-}
-
-/* Glass card — top of the tower, flat where it meets the pedestal */
-.podium-card-glass {
+/* Card */
+.gcp__card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 30px 18px 22px;
-  border-radius: 22px 22px 0 0;
+  gap: 9px;
   text-align: center;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
-  border: 1px solid var(--line-strong);
+  padding: 26px 16px 20px;
+  border-radius: 20px 20px 0 0;
+  background: #ffffff;
+  border: 1px solid var(--line);
   border-bottom: none;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-1);
 }
 
-.podium-card-1 .podium-card-glass {
-  padding: 34px 20px 24px;
-  background: linear-gradient(180deg, rgba(74, 222, 128, 0.14), rgba(74, 222, 128, 0.03));
-  border-color: rgba(74, 222, 128, 0.42);
+.gcp__col--1 .gcp__card {
+  padding: 32px 18px 22px;
+  border-color: color-mix(in srgb, var(--metal-gold) 42%, var(--line));
+  box-shadow: 0 2px 4px rgba(64, 48, 27, 0.06), 0 30px 60px -30px rgba(155, 122, 20, 0.5);
 }
 
-/* ── Crest (medal) ── */
-.podium-crest {
+/* Thin brand-green top border — the unequal-weight cue for #1 */
+.gcp__col--1 .gcp__card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--brand);
+}
+
+.gcp__medal {
+  margin-top: -2px;
+  line-height: 0;
+}
+
+.gcp__avatar {
   display: grid;
   place-items: center;
-  margin-top: -6px;
-  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.32));
-}
-
-/* ── Avatar monogram ── */
-.podium-avatar {
-  display: grid;
-  place-items: center;
-  width: 68px;
-  height: 68px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   overflow: hidden;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  background: var(--surface-2);
   border: 1px solid var(--line-strong);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
   color: var(--text-strong);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
 }
 
-/* Real hostel image drops straight into the circle when available */
-.podium-avatar img {
+.gcp__col--1 .gcp__avatar {
+  width: 68px;
+  height: 68px;
+  font-size: 1.2rem;
+  border-color: color-mix(in srgb, var(--metal-gold) 50%, var(--line-strong));
+}
+
+.gcp__avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.podium-avatar-1 {
-  width: 78px;
-  height: 78px;
-  font-size: 1.3rem;
-  background: linear-gradient(160deg, rgba(74, 222, 128, 0.24), rgba(45, 212, 191, 0.06));
-  border-color: rgba(74, 222, 128, 0.4);
-}
-
-/* Real, glossy podium medals */
-.podium-medal-emoji {
-  display: block;
-  line-height: 1;
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.45));
-}
-
-/* ── Name / score ── */
-.podium-name {
+.gcp__name {
+  margin: 0;
   max-width: 100%;
-  font-size: 1.05rem;
+  font-family: var(--font-display);
   font-weight: 600;
+  font-size: 1rem;
   color: var(--text-strong);
-  letter-spacing: -0.01em;
   line-height: 1.2;
+  letter-spacing: -0.01em;
   overflow-wrap: break-word;
 }
 
-.podium-card-1 .podium-name { font-size: 1.2rem; }
-
-.podium-score-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
+.gcp__col--1 .gcp__name {
+  font-size: 1.16rem;
 }
 
-.podium-score {
-  font-size: 1.7rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+.gcp__score {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.gcp__num {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: -0.02em;
   color: var(--text-strong);
   font-variant-numeric: tabular-nums;
 }
 
-.podium-card-1 .podium-score {
-  font-size: 2.1rem;
-  color: var(--green-deep);
+.gcp__col--1 .gcp__num {
+  font-size: 2rem;
+  color: var(--brand-deep);
 }
 
-.podium-score-label {
-  font-size: 0.66rem;
+.gcp__unit {
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   color: var(--text-muted);
+  font-weight: 600;
 }
 
-/* ── Solid pedestal base — bottom of the tower ── */
-.podium-pedestal {
+/* Plinth */
+.gcp__plinth {
   position: relative;
   display: grid;
   place-items: center;
-  border-radius: 0 0 14px 14px;
-  border: 1px solid var(--line-strong);
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02) 44%, rgba(0, 0, 0, 0.24));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -16px 22px -16px rgba(0, 0, 0, 0.55);
-  overflow: hidden;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid var(--line);
+  border-top: none;
+  background: linear-gradient(180deg, var(--surface-1), var(--paper-2));
+  box-shadow: inset 0 10px 18px -14px rgba(64, 48, 27, 0.18);
 }
 
-.pedestal-1 {
-  height: clamp(118px, 17vh, 186px);
-  background: linear-gradient(180deg, rgba(74, 222, 128, 0.2), rgba(74, 222, 128, 0.05) 44%, rgba(0, 0, 0, 0.22));
-  border-color: rgba(74, 222, 128, 0.3);
-  border-top-color: rgba(74, 222, 128, 0.42);
+.gcp__col--1 .gcp__plinth {
+  height: clamp(96px, 14vh, 150px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--metal-gold) 15%, var(--surface-1)), var(--paper-2));
+  border-color: color-mix(in srgb, var(--metal-gold) 32%, var(--line));
 }
 
-.pedestal-2 { height: clamp(90px, 13vh, 140px); }
-.pedestal-3 { height: clamp(64px, 10vh, 104px); }
+.gcp__col--2 .gcp__plinth { height: clamp(74px, 11vh, 116px); }
+.gcp__col--3 .gcp__plinth { height: clamp(56px, 9vh, 92px); }
 
-.pedestal-rank {
-  font-size: clamp(2rem, 5.5vw, 3.4rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: rgba(255, 255, 255, 0.22);
+.gcp__place {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3.6vw, 2.2rem);
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
-.pedestal-1 .pedestal-rank { color: rgba(74, 222, 128, 0.5); }
-
-.pedestal-sheen {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 34%, rgba(255, 255, 255, 0.08) 50%, transparent 62%);
-  pointer-events: none;
-}
+.gcp__col--1 .gcp__place { color: var(--metal-gold); }
+.gcp__col--2 .gcp__place { color: var(--metal-silver); }
+.gcp__col--3 .gcp__place { color: var(--metal-bronze); }
 
 @media (max-width: 620px) {
-  .podium-stage { gap: 6px; width: 100%; }
-  .podium-card-glass { padding: 20px 8px 14px; gap: 7px; border-radius: 16px 16px 0 0; }
-  .podium-card-1 .podium-card-glass { padding: 22px 10px 16px; }
-  .podium-crest { margin-top: -4px; }
-  .podium-avatar { width: 52px; height: 52px; font-size: 0.9rem; }
-  .podium-avatar-1 { width: 60px; height: 60px; font-size: 1rem; }
-  .podium-name { font-size: 0.82rem; }
-  .podium-card-1 .podium-name { font-size: 0.92rem; }
-  .podium-score { font-size: 1.25rem; }
-  .podium-card-1 .podium-score { font-size: 1.5rem; }
-  .podium-score-label { font-size: 0.58rem; letter-spacing: 0.12em; }
-  .pedestal-rank { font-size: clamp(1.5rem, 7vw, 2.2rem); }
+  .gcp__stage { gap: 6px; width: 100%; }
+  .gcp__card { padding: 20px 8px 14px; gap: 7px; border-radius: 15px 15px 0 0; }
+  .gcp__col--1 .gcp__card { padding: 24px 10px 16px; }
+  .gcp__avatar { width: 46px; height: 46px; font-size: 0.86rem; }
+  .gcp__col--1 .gcp__avatar { width: 54px; height: 54px; font-size: 0.98rem; }
+  .gcp__name { font-size: 0.8rem; }
+  .gcp__col--1 .gcp__name { font-size: 0.92rem; }
+  .gcp__num { font-size: 1.2rem; }
+  .gcp__col--1 .gcp__num { font-size: 1.5rem; }
+  .gcp__unit { font-size: 0.56rem; letter-spacing: 0.12em; }
+  .gcp__place { font-size: clamp(1.3rem, 6vw, 1.9rem); }
 }
 
 /* ─── CATEGORY BADGES ─── */
@@ -1132,6 +1097,7 @@ textarea {
 .leaderboard-table {
   display: grid;
   gap: 6px;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .leaderboard-head,
@@ -1155,7 +1121,7 @@ textarea {
 .leaderboard-row {
   padding: 14px 10px;
   border-bottom: 1px solid var(--line);
-  transition: background 180ms ease, border-radius 180ms ease;
+  transition: background 180ms ease, transform 180ms var(--ease-out), border-radius 180ms ease;
   border-radius: 0;
   font-variant-numeric: tabular-nums;
 }
@@ -1167,6 +1133,7 @@ textarea {
 .leaderboard-row:hover {
   background: var(--surface-2);
   border-radius: 10px;
+  transform: translateX(4px);
 }
 
 /* ─── RANK PILL ─── */
@@ -1198,15 +1165,15 @@ textarea {
 }
 
 .rank-pill-gold {
-  background: linear-gradient(150deg, #fdeeb3 0%, #f2c64c 55%, #c08a1e 100%);
+  background: linear-gradient(150deg, #D6B67C 0%, #B8904A 60%, #94702F 100%);
 }
 
 .rank-pill-silver {
-  background: linear-gradient(150deg, #f6f9fc 0%, #cbd5e1 55%, #8a97a6 100%);
+  background: linear-gradient(150deg, #D3D6DA 0%, #A9ADB3 60%, #868B92 100%);
 }
 
 .rank-pill-bronze {
-  background: linear-gradient(150deg, #f7cea3 0%, #d28e54 55%, #93542a 100%);
+  background: linear-gradient(150deg, #D6A87E 0%, #B37A54 60%, #8E5A38 100%);
   color: #2a1408;
 }
 
@@ -1241,23 +1208,14 @@ textarea {
 /* ─── SCORE VALUE ─── */
 .score-value {
   color: var(--green);
+  font-variant-numeric: tabular-nums lining-nums;
   font-size: 1.2rem;
   font-weight: 700;
 }
 
-/* ─── LEADERBOARD TABLE TEXT (plain white) ─── */
-.table-panel .panel-heading h3,
-.table-panel .leaderboard-head,
-.table-panel .leaderboard-row,
-.table-panel .hostel-meta strong,
-.table-panel .hostel-meta small,
-.table-panel .score-value,
-.table-panel .rank-pill-default {
-  color: #ffffff;
-}
-
+/* ─── LEADERBOARD TABLE TEXT ─── */
 .table-panel .hostel-meta strong {
-  font-weight: 800;
+  font-weight: 700;
 }
 
 /* ─── SEGMENT BAR ─── */
@@ -1340,38 +1298,16 @@ textarea {
   flex: 1;
 }
 
-/* ─── BATTLE MODE (plain white text + dark dropdowns) ─── */
-.battle-mode-card {
-  --chart-axis: #ffffff;
-}
-
-.battle-mode-card .eyebrow,
-.battle-mode-card .panel-heading h3,
-.battle-mode-card .compare-controls span {
-  color: #ffffff;
-}
-
-.battle-mode-card .recharts-legend-item-text {
-  color: #ffffff !important;
-}
-
+/* ─── BATTLE MODE (light dropdowns) ─── */
 .battle-mode-card .compare-controls select {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-color: #12181f;
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.14);
   padding-right: 42px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2323281F' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 18px center;
   background-size: 14px;
-}
-
-.battle-mode-card .compare-controls select option {
-  background-color: #12181f;
-  color: #ffffff;
 }
 
 /* ─── ADMIN FORM ─── */
@@ -1716,3 +1652,15 @@ textarea {
   flex-shrink: 0;
 }
 
+
+/* ─── REDUCED MOTION ─── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ambient-blob { transition: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 120ms !important;
+    scroll-behavior: auto !important;
+  }
+}

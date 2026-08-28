@@ -24,7 +24,7 @@ export default function Navbar({ viewer, onSignOut }) {
           <BorderGlow
             className="admin-login-glow"
             borderRadius={999}
-            colors={["#3B82F6", "#06B6D4"]}
+            colors={["#2F7A50", "#2E7D93"]}
             backgroundColor="var(--tab-bg)"
           >
             <Link href="/auth" className="ghost-link meta-login">
