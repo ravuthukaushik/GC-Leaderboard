@@ -9,6 +9,7 @@ import AdminPanel from "@/components/admin-panel";
 import HostelDataPanel from "@/components/hostel-data-panel";
 import JudgingCriteria from "@/components/judging-criteria";
 import PodiumCarousel from "@/components/podium-carousel";
+import TrophyHero from "@/components/trophy-hero";
 import { cx } from "@/lib/utils";
 
 export default function DashboardContent({
@@ -23,6 +24,8 @@ export default function DashboardContent({
   const isAdminUser = viewer?.role === "admin";
   const podiumTop3 = payload.leaderboard.slice(0, 3);
   const showPodium = podiumTop3.length >= 3 && (activeTab === "leaderboard" || activeTab === "analytics");
+  // The trophy-dismantle hero is the landing moment on the primary view only.
+  const showHero = podiumTop3.length >= 3 && activeTab === "leaderboard";
   const tabs = [
     { id: "leaderboard", label: "Leaderboard" },
     { id: "analytics", label: "Analytics" },
@@ -54,6 +57,8 @@ export default function DashboardContent({
   return (
     <main className="page-shell dashboard-content-shell">
       <Navbar viewer={viewer} onSignOut={onSignOut} />
+
+      {showHero ? <TrophyHero /> : null}
 
       {showPodium ? <PodiumCarousel top3={podiumTop3} /> : null}
 

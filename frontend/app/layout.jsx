@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AmbientBackground from "@/components/ambient-background";
+import TopoBackground from "@/components/topo-background";
 
 // Inter across the whole product — display headings and dense tabular data alike.
 const inter = Inter({
@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <AmbientBackground />
+        <TopoBackground />
         {children}
       </body>
     </html>

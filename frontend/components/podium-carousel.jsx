@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import PodiumMedal from "@/components/podium-medal";
+import { introForThisLoad } from "@/lib/intro";
 
 // Two-letter monogram from a hostel name (e.g. "Hostel 5" → "H5").
 function monogram(name) {
@@ -99,6 +100,10 @@ export default function PodiumCarousel({ top3 }) {
       tl = gsap.timeline();
       tl.to([intro, ...cols], { opacity: 1, duration: 0.5, ease: "power2.out" }, 0);
       if (spot) tl.to(spot, { opacity: 1, duration: 0.5 }, 0);
+    } else if (!introForThisLoad()) {
+      // Revisit / route return — the intro already played this session. Show the
+      // final podium instantly, no choreography.
+      settle();
     } else {
       // Measure how far each wing must travel back to the champion's centre so it
       // can start stacked behind #1 and be "dealt out" to its flank.
@@ -147,13 +152,13 @@ export default function PodiumCarousel({ top3 }) {
     // setTimeout fires even when the ticker is throttled — the podium can never
     // be left stranded mid-animation.
     const safety = window.setTimeout(() => {
-      if (tl.progress() < 1) settle();
+      if (tl && tl.progress() < 1) settle();
     }, 3400);
-    tl.eventCallback("onComplete", () => window.clearTimeout(safety));
+    if (tl) tl.eventCallback("onComplete", () => window.clearTimeout(safety));
 
     return () => {
       window.clearTimeout(safety);
-      tl.kill();
+      tl?.kill();
       hoverCleanups.forEach((fn) => fn());
       settle();
     };
