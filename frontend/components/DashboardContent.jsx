@@ -10,6 +10,7 @@ import HostelDataPanel from "@/components/hostel-data-panel";
 import JudgingCriteria from "@/components/judging-criteria";
 import PodiumCarousel from "@/components/podium-carousel";
 import TrophyHero from "@/components/trophy-hero";
+import { hasIntroPlayed } from "@/lib/intro-film";
 import { cx } from "@/lib/utils";
 
 export default function DashboardContent({
@@ -24,8 +25,11 @@ export default function DashboardContent({
   const isAdminUser = viewer?.role === "admin";
   const podiumTop3 = payload.leaderboard.slice(0, 3);
   const showPodium = podiumTop3.length >= 3 && (activeTab === "leaderboard" || activeTab === "analytics");
-  // The trophy-dismantle hero is the landing moment on the primary view only.
-  const showHero = podiumTop3.length >= 3 && activeTab === "leaderboard";
+  // The cup film is the landing moment, and only until it has played on this page
+  // load. After that (e.g. returning from Analytics) the leaderboard shows the
+  // SAME standalone podium as Analytics, so both tabs are identical in position
+  // and both replay the same podium reveal when you switch between them.
+  const showHero = podiumTop3.length >= 3 && activeTab === "leaderboard" && !hasIntroPlayed();
   const tabs = [
     { id: "leaderboard", label: "Leaderboard" },
     { id: "analytics", label: "Analytics" },

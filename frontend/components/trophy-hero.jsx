@@ -34,17 +34,21 @@ function isLowPower() {
 }
 
 export default function TrophyHero({ top3 = [] }) {
-  const [use3D, setUse3D] = useState(false);
+  // null = not decided yet. We must not render EITHER hero before the client-side
+  // capability check, or the SVG cup flashes for a frame before the 3D one mounts.
+  const [mode, setMode] = useState(null);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) return; // SVG static handles reduced motion
-    if (!isLowPower() && hasWebGL()) setUse3D(true);
+    setMode(!reduce && !isLowPower() && hasWebGL() ? "three" : "svg");
   }, []);
+
+  // Undecided (SSR + first paint): a blank spacer, so nothing wrong flashes.
+  if (mode === null) return <section className="tphero-placeholder" aria-hidden="true" />;
 
   // 3D hero owns the podium (it rises out of the cup). The flat fallback shows the
   // SVG dismantle followed by the normal podium below it.
-  if (use3D) return <TrophyHero3D top3={top3} />;
+  if (mode === "three") return <TrophyHero3D top3={top3} />;
   return (
     <>
       <TrophyHeroSVG />

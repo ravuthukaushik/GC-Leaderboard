@@ -171,7 +171,7 @@ export default function PodiumCarousel({ top3 }) {
     <section className="gcp" aria-label="Top three hostels" ref={rootRef}>
       <header className="gcp__intro">
         <h1 className="gcp__title">
-          The <em>Green Cup</em> podium
+          The <em>Green Cup</em> Leaderboard
         </h1>
       </header>
 
