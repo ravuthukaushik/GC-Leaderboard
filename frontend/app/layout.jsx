@@ -2,7 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import TopoBackground from "@/components/topo-background";
 
-// Inter across the whole product — display headings and dense tabular data alike.
+// Inter across the whole product - display headings and dense tabular data alike.
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -18,6 +18,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <body>
+        <div className="watercolor" aria-hidden="true" />
         <TopoBackground />
         {children}
       </body>

@@ -1,16 +1,16 @@
 "use client";
 
 /* =============================================================================
-   Animation ownership — Green Cup (documented split; do not overlap)
+   Animation ownership - Green Cup (documented split; do not overlap)
    ─ anime.js : full-page FIRST-LOAD choreography. This topographic contour map
                 (a nod to the IIT Bombay campus / Powai terrain behind the Green
                 Map) draws itself stroke-by-stroke via svg.createDrawable, from
-                the centre outward — the "elevation" rising from the peak. The
+                the centre outward - the "elevation" rising from the peak. The
                 site's signature easing (SIGNATURE_EASE) is defined + used here.
    ─ GSAP     : scroll-driven work. Below, ScrollTrigger scrubs a slow parallax
                 drift on the contour group; the leaderboard rows use ScrollTrigger
                 to cascade in as they enter view.
-   ─ framer   : component-level React state/gesture — the tab pill, card hovers.
+   ─ framer   : component-level React state/gesture - the tab pill, card hovers.
    If two libraries could own an effect, it belongs to whichever is doing MORE of
    the surrounding sequence.
    ============================================================================ */
@@ -23,7 +23,7 @@ import { introForThisLoad, prefersReducedMotion } from "@/lib/intro";
 
 if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
-// This site's signature curve — a confident, slightly front-loaded ease-out,
+// This site's signature curve - a confident, slightly front-loaded ease-out,
 // used consistently for the topographic draw (deliberately not a stock name).
 const SIGNATURE_EASE = "cubicBezier(0.32, 0.86, 0.18, 1)";
 
@@ -32,7 +32,7 @@ const VH = 900;
 const CX = 748; // peak sits slightly west-of-centre, like the campus hill
 const CY = 452;
 
-// Catmull-Rom → cubic bezier, closed — smooth organic contour rings.
+// Catmull-Rom → cubic bezier, closed - smooth organic contour rings.
 function smoothClosed(points) {
   const n = points.length;
   let d = `M ${points[0][0].toFixed(1)} ${points[0][1].toFixed(1)} `;
@@ -75,18 +75,6 @@ export default function TopoBackground() {
     return out;
   }, []);
 
-  // Powai-lake nod — a filled contour blob, off to the west.
-  const lake = useMemo(() => {
-    const steps = 14;
-    const pts = [];
-    for (let i = 0; i < steps; i++) {
-      const a = (i / steps) * Math.PI * 2;
-      const r = 118 * (1 + 0.22 * Math.sin(a * 2 + 1.2) + 0.12 * Math.cos(a * 3));
-      pts.push([300 + r * Math.cos(a) * 1.35, 640 + r * Math.sin(a) * 0.8]);
-    }
-    return smoothClosed(pts);
-  }, []);
-
   useLayoutEffect(() => {
     const root = rootRef.current;
     const group = groupRef.current;
@@ -98,27 +86,24 @@ export default function TopoBackground() {
     let tl;
     let safety;
 
-    // Guaranteed resting state — the map can never be stranded hidden if the
+    // Guaranteed resting state - the map can never be stranded hidden if the
     // ticker is throttled (backgrounded first load / non-compositing frame).
     const forceRest = () => {
       lines.forEach((l) => { l.style.strokeDasharray = "none"; l.style.strokeDashoffset = "0"; });
       group.style.opacity = "1";
-      const lakeEl = root.querySelector(".topo__lake");
-      if (lakeEl) lakeEl.style.opacity = "1";
     };
 
     if (play) {
       group.style.opacity = "0"; // hide any pre-draw flash before the timeline runs
       const drawables = svg.createDrawable(lines);
       tl = createTimeline({ defaults: { ease: SIGNATURE_EASE }, onComplete: () => window.clearTimeout(safety) });
-      // Contours draw from the centre outward — the peak first.
+      // Contours draw from the centre outward - the peak first.
       tl.add(drawables, { draw: ["0 0", "0 1"], duration: 1500, delay: stagger(65, { from: "center" }) }, 0);
       tl.add(group, { opacity: [0, 1], duration: 900, ease: "out(2)" }, 0);
-      tl.add(".topo__lake", { opacity: [0, 1], duration: 1100, ease: "out(2)" }, 400);
       safety = window.setTimeout(forceRest, 2900);
     }
 
-    // GSAP owns scroll — a slow parallax drift so the terrain feels alive.
+    // GSAP owns scroll - a slow parallax drift so the terrain feels alive.
     let scrollTween;
     if (!reduce) {
       scrollTween = gsap.to(group, {
@@ -144,7 +129,6 @@ export default function TopoBackground() {
     <div className="topo" ref={rootRef} aria-hidden="true">
       <svg className="topo__svg" viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="xMidYMid slice">
         <g className="topo__g" ref={groupRef}>
-          <path className="topo__lake" d={lake} />
           {rings.map((d, i) => (
             <path className="topo__line" key={i} d={d} />
           ))}

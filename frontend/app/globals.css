@@ -1,5 +1,5 @@
 /* ====================================================================
-   GREEN CUP COMMAND CENTER — Design System
+   GREEN CUP COMMAND CENTER - Design System
    Glassmorphism · Light/Dark Theme · Inter · Animated Backgrounds
    ==================================================================== */
 
@@ -38,28 +38,28 @@
   --surface-1: #FBF9F2;
   --surface-2: #EFEBDF;
 
-  /* Elevation shadows (calm, soft — no glass) */
+  /* Elevation shadows (calm, soft - no glass) */
   --shadow-1: 0 1px 2px rgba(64, 48, 27, 0.05), 0 10px 24px -18px rgba(64, 48, 27, 0.22);
   --shadow-2: 0 2px 5px rgba(64, 48, 27, 0.06), 0 22px 48px -26px rgba(64, 48, 27, 0.30);
 
   /* Focus */
   --focus-ring: var(--brand);
 
-  /* Category / basket colours — restrained eco */
-  --color-electricity: #3B7EA1;              /* Resources · slate-teal */
-  --color-electricity-soft: rgba(59, 126, 161, 0.12);
-  --color-waste: #6A9E52;                     /* Waste · olive */
-  --color-waste-soft: rgba(106, 158, 82, 0.13);
-  --color-events: #CD8551;                    /* Community · terracotta */
-  --color-events-soft: rgba(205, 133, 81, 0.14);
+  /* Category / basket colours - restrained eco */
+  --color-electricity: #2A78D6;              /* Resources · blue (CVD-validated) */
+  --color-electricity-soft: rgba(42, 120, 214, 0.12);
+  --color-waste: #1BAF7A;                     /* Waste · green (CVD-validated) */
+  --color-waste-soft: rgba(27, 175, 122, 0.13);
+  --color-events: #EB6834;                    /* Community · orange (CVD-validated) */
+  --color-events-soft: rgba(235, 104, 52, 0.13);
 
-  /* Brand green — confident, used sparingly */
+  /* Brand green - confident, used sparingly */
   --brand: #3D6B4F;
   --brand-deep: #2E5340;
   --green: var(--brand);
   --green-deep: var(--brand-deep);
 
-  /* Medals — muted, real metals */
+  /* Medals - muted, real metals */
   --metal-gold: #B8904A;
   --metal-silver: #A9ADB3;
   --metal-bronze: #B37A54;
@@ -98,7 +98,7 @@
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
-  /* Typography — Inter throughout (display + body) */
+  /* Typography - Inter throughout (display + body) */
   --font-display: var(--font-inter, "Inter", system-ui, sans-serif);
   --font-body: var(--font-inter, "Inter", system-ui, sans-serif);
 
@@ -137,7 +137,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Fine paper grain — the "natural material" texture, kept very subtle. */
+/* Fine paper grain - the "natural material" texture, kept very subtle. */
 body::before {
   content: "";
   position: fixed;
@@ -150,6 +150,23 @@ body::before {
 }
 
 /* ─── TOPOGRAPHIC MAP BACKGROUND (campus terrain; felt, not seen) ─── */
+/* Optional watercolor wash (drop a file at /public/watercolor-bg.jpg). Kept faint
+   and anchored to the bottom-right so its darker teal reads as a soft corner
+   accent, never competing with cards/tables. Absent file = simply nothing shows. */
+.watercolor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("/watercolor-bg.jpg") center / cover no-repeat;
+  opacity: 0.5;
+  filter: saturate(0.9);
+  /* Teal reads strongest down the right edge, with a lighter wash on the far left
+     too (like the source image); the centre content column stays on clean paper. */
+  -webkit-mask-image: linear-gradient(100deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.06) 20%, rgba(0,0,0,0.06) 42%, #000 72%);
+  mask-image: linear-gradient(100deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.06) 20%, rgba(0,0,0,0.06) 42%, #000 72%);
+}
+
 .topo {
   position: fixed;
   inset: 0;
@@ -177,12 +194,6 @@ body::before {
 /* Inner rings (peak) read a touch stronger than the outskirts. */
 .topo__line:nth-child(-n + 6) { stroke: rgba(61, 107, 79, 0.14); }
 .topo__line:nth-last-child(-n + 4) { stroke: rgba(61, 107, 79, 0.07); }
-/* Powai-lake nod */
-.topo__lake {
-  fill: rgba(46, 125, 147, 0.05);
-  stroke: rgba(46, 125, 147, 0.14);
-  stroke-width: 1.2;
-}
 
 /* Accessible, unobtrusive keyboard focus */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
@@ -552,7 +563,7 @@ textarea {
   display: flex;
   width: fit-content;
   max-width: 100%;
-  margin: 24px auto 0;
+  margin: 14px auto 0;
   gap: 4px;
   padding: 5px;
   border-radius: var(--radius-md);
@@ -803,13 +814,13 @@ textarea {
   margin-top: 0;
 }
 
-/* ═══════════ PODIUM — light award cards on plinths (GSAP-driven) ═══════════ */
+/* ═══════════ PODIUM - light award cards on plinths (GSAP-driven) ═══════════ */
 .gcp {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(20px, 4vh, 48px) 0 clamp(14px, 3vh, 32px);
+  padding: clamp(10px, 2vh, 24px) 0 clamp(6px, 1.2vh, 14px);
   isolation: isolate;
 }
 
@@ -843,31 +854,29 @@ textarea {
   color: var(--brand);
 }
 
-/* Stage — 2nd · 1st · 3rd, centre tallest */
+/* Stage - 2nd · 1st · 3rd. Floating cards ABOVE a detached stepped podium base. */
 .gcp__stage {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(10px, 1.6vw, 20px);
-  width: min(760px, 96vw);
+  gap: clamp(14px, 2vw, 30px);
+  width: min(840px, 96vw);
   margin: 0;
-  padding: 0 0 6px;
+  padding: 10px 0 8px;
   list-style: none;
 }
 
 .gcp__col {
   position: relative;
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   justify-content: flex-end;
   will-change: transform, opacity;
 }
 
 .gcp__col--1 {
-  flex-grow: 1.14;
   z-index: 2;
 }
 
@@ -875,108 +884,88 @@ textarea {
 .gcp__spotlight {
   position: absolute;
   left: 50%;
-  top: 36%;
-  width: 168%;
-  height: 118%;
+  top: 46%;
+  width: 190%;
+  height: 152%;
   transform: translate(-50%, -50%);
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(closest-side, rgba(61, 107, 79, 0.18), transparent 72%),
-    radial-gradient(closest-side, rgba(184, 144, 74, 0.1), transparent 66%);
-  filter: blur(8px);
+    radial-gradient(closest-side, rgba(61, 107, 79, 0.16), transparent 72%),
+    radial-gradient(closest-side, rgba(184, 144, 74, 0.12), transparent 62%);
+  filter: blur(10px);
 }
 
-/* Grounded floor shadow */
-.gcp__col::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -14px;
-  width: 74%;
-  height: 20px;
-  transform: translateX(-50%);
-  background: radial-gradient(50% 50% at 50% 50%, rgba(64, 48, 27, 0.16), transparent 72%);
-  filter: blur(6px);
-  z-index: -1;
-  pointer-events: none;
-}
-
-/* Card */
+/* Floating card */
 .gcp__card {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 9px;
+  gap: 15px;
   text-align: center;
-  padding: 26px 16px 20px;
-  border-radius: 20px 20px 0 0;
+  width: clamp(172px, 23vw, 224px);
+  padding: 34px 22px 34px;
+  border-radius: 24px;
   background: #ffffff;
   border: 1px solid var(--line);
-  border-bottom: none;
-  box-shadow: var(--shadow-1);
+  box-shadow: 0 2px 6px rgba(64, 48, 27, 0.05), 0 26px 46px -28px rgba(64, 48, 27, 0.4);
 }
 
+/* #1 is larger; the taller podium step lifts it above the others */
 .gcp__col--1 .gcp__card {
-  padding: 32px 18px 22px;
-  border-color: color-mix(in srgb, var(--metal-gold) 42%, var(--line));
-  box-shadow: 0 2px 4px rgba(64, 48, 27, 0.06), 0 30px 60px -30px rgba(155, 122, 20, 0.5);
+  width: clamp(196px, 26vw, 256px);
+  padding: 42px 24px 42px;
+  border-color: color-mix(in srgb, var(--metal-gold) 44%, var(--line));
+  box-shadow: 0 4px 10px rgba(64, 48, 27, 0.06), 0 44px 74px -30px rgba(155, 122, 20, 0.5);
 }
 
-/* Thin brand-green top border — the unequal-weight cue for #1 */
-.gcp__col--1 .gcp__card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 16px;
-  right: 16px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--brand);
-}
-
-.gcp__medal {
-  margin-top: -2px;
+.gcp__seal {
   line-height: 0;
 }
 
-.gcp__avatar {
+/* Detached stepped podium base - separated from the card, open at the bottom,
+   graduated heights (1 tallest · 2 · 3), rank numeral on the step. */
+.gcp__stand {
+  position: relative;
+  width: 82%;
+  margin-top: clamp(8px, 1.4vh, 14px);
   display: grid;
   place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: var(--surface-2);
-  border: 1px solid var(--line-strong);
-  color: var(--text-strong);
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(180deg, var(--surface-1), var(--paper-2));
+  border: 1px solid var(--line);
+  border-bottom: none;
+  box-shadow: inset 0 14px 22px -16px rgba(64, 48, 27, 0.2);
+}
+
+.gcp__col--1 .gcp__stand {
+  height: clamp(72px, 10vh, 112px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--metal-gold) 16%, var(--surface-1)), var(--paper-2));
+  border-color: color-mix(in srgb, var(--metal-gold) 34%, var(--line));
+}
+
+.gcp__col--2 .gcp__stand { height: clamp(54px, 7.5vh, 84px); }
+.gcp__col--3 .gcp__stand { height: clamp(40px, 6vh, 64px); }
+
+.gcp__stand-num {
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
-.gcp__col--1 .gcp__avatar {
-  width: 68px;
-  height: 68px;
-  font-size: 1.2rem;
-  border-color: color-mix(in srgb, var(--metal-gold) 50%, var(--line-strong));
-}
-
-.gcp__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+.gcp__col--1 .gcp__stand-num { color: var(--metal-gold); }
+.gcp__col--2 .gcp__stand-num { color: var(--metal-silver); }
+.gcp__col--3 .gcp__stand-num { color: var(--metal-bronze); }
 
 .gcp__name {
   margin: 0;
   max-width: 100%;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.16rem;
   color: var(--text-strong);
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -984,7 +973,7 @@ textarea {
 }
 
 .gcp__col--1 .gcp__name {
-  font-size: 1.16rem;
+  font-size: 1.34rem;
 }
 
 .gcp__score {
@@ -1016,51 +1005,19 @@ textarea {
   font-weight: 600;
 }
 
-/* Plinth */
-.gcp__plinth {
-  position: relative;
-  display: grid;
-  place-items: center;
-  border-radius: 0 0 12px 12px;
-  border: 1px solid var(--line);
-  border-top: none;
-  background: linear-gradient(180deg, var(--surface-1), var(--paper-2));
-  box-shadow: inset 0 10px 18px -14px rgba(64, 48, 27, 0.18);
-}
-
-.gcp__col--1 .gcp__plinth {
-  height: clamp(96px, 14vh, 150px);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--metal-gold) 15%, var(--surface-1)), var(--paper-2));
-  border-color: color-mix(in srgb, var(--metal-gold) 32%, var(--line));
-}
-
-.gcp__col--2 .gcp__plinth { height: clamp(74px, 11vh, 116px); }
-.gcp__col--3 .gcp__plinth { height: clamp(56px, 9vh, 92px); }
-
-.gcp__place {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(1.5rem, 3.6vw, 2.2rem);
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-.gcp__col--1 .gcp__place { color: var(--metal-gold); }
-.gcp__col--2 .gcp__place { color: var(--metal-silver); }
-.gcp__col--3 .gcp__place { color: var(--metal-bronze); }
-
 @media (max-width: 620px) {
-  .gcp__stage { gap: 6px; width: 100%; }
-  .gcp__card { padding: 20px 8px 14px; gap: 7px; border-radius: 15px 15px 0 0; }
-  .gcp__col--1 .gcp__card { padding: 24px 10px 16px; }
-  .gcp__avatar { width: 46px; height: 46px; font-size: 0.86rem; }
-  .gcp__col--1 .gcp__avatar { width: 54px; height: 54px; font-size: 0.98rem; }
-  .gcp__name { font-size: 0.8rem; }
-  .gcp__col--1 .gcp__name { font-size: 0.92rem; }
-  .gcp__num { font-size: 1.2rem; }
-  .gcp__col--1 .gcp__num { font-size: 1.5rem; }
+  .gcp__stage { gap: 8px; width: 100%; }
+  .gcp__card { width: clamp(96px, 30vw, 130px); padding: 18px 10px 16px; gap: 8px; border-radius: 18px; }
+  .gcp__col--1 .gcp__card { width: clamp(110px, 33vw, 150px); padding: 22px 12px 18px; }
+  .gcp__name { font-size: 0.82rem; }
+  .gcp__col--1 .gcp__name { font-size: 0.94rem; }
+  .gcp__num { font-size: 1.25rem; }
+  .gcp__col--1 .gcp__num { font-size: 1.55rem; }
   .gcp__unit { font-size: 0.56rem; letter-spacing: 0.12em; }
-  .gcp__place { font-size: clamp(1.3rem, 6vw, 1.9rem); }
+  .gcp__col--1 .gcp__stand { height: clamp(64px, 12vh, 100px); }
+  .gcp__col--2 .gcp__stand { height: clamp(48px, 9vh, 78px); }
+  .gcp__col--3 .gcp__stand { height: clamp(36px, 7vh, 60px); }
+  .gcp__stand-num { font-size: clamp(1.2rem, 6vw, 1.8rem); }
 }
 
 /* ─── CATEGORY BADGES ─── */
@@ -1146,23 +1103,31 @@ textarea {
 
 /* ─── RANK PILL ─── */
 .rank-pill {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   font-weight: 700;
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  font-size: 0.95rem;
+  color: var(--text-strong);
   border: 1px solid var(--line);
-  background: var(--tab-bg);
+  background: linear-gradient(158deg, #ffffff, var(--paper-2));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 2px rgba(64, 48, 27, 0.06);
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .rank-pill-default {
-  background: var(--tab-bg);
+  color: var(--text-muted);
 }
 
-/* Medal-tinted pills for the top three — consistent with the podium */
+.rank-medal {
+  display: grid;
+  place-items: center;
+  line-height: 0;
+}
+
+/* Medal-tinted pills for the top three - consistent with the podium */
 .rank-pill-gold,
 .rank-pill-silver,
 .rank-pill-bronze {
@@ -1688,7 +1653,7 @@ textarea {
   padding: clamp(3rem, 8vh, 6rem) 0 clamp(1rem, 4vh, 2.5rem);
 }
 
-/* No scrub in reduced-motion — the "scroll to dismantle" cue would be a lie. */
+/* No scrub in reduced-motion - the "scroll to dismantle" cue would be a lie. */
 .tphero[data-static="true"] .tphero__cue {
   display: none;
 }
@@ -1758,6 +1723,70 @@ textarea {
   opacity: 0;
   font-weight: 600;
   color: var(--brand);
+}
+
+/* ── 3D variant: scroll range for rotate → dismantle → portal → podium rising ── */
+.tphero3d {
+  height: 150vh;
+}
+
+/* Break the pinned scene out of the 1280px centred container to full viewport
+   width, so the cup + bloom fill the whole screen (not a boxed rectangle). */
+.tphero3d .tphero__sticky {
+  display: block;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+.tphero3d__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.18s linear;
+}
+
+.tphero3d__flash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  /* Soft white bloom that dissolves into the page's paper - no gold wash. */
+  background: radial-gradient(circle at 50% 46%, #ffffff 0%, #ffffff 34%, var(--paper) 100%);
+}
+
+/* The podium that rises out of the cup - scrubbed by the same scroll progress. */
+.tphero3d__podium {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 15vh;
+  pointer-events: none;
+}
+
+.tphero3d__podium .gcp__stage {
+  transform: scale(0.92);
+}
+
+.tphero3d__podium .gcp__col {
+  will-change: transform, opacity;
+}
+
+.tphero3d .tphero__copy {
+  position: absolute;
+  top: clamp(9vh, 13vh, 18vh);
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 4;
+  will-change: transform, opacity;
 }
 
 

@@ -1,6 +1,6 @@
 "use client";
 
-/* Bespoke tier mark for the Green Cup — a single leaf "crest", not a medal.
+/* Bespoke tier mark for the Green Cup - a single leaf "crest", not a medal.
    Deliberately NOT the shiny gradient-disc-on-ribbon look (the classic leaderboard
    AI-slop tell), and no emoji. One geometric single-weight outline in the lucide
    house style, recolored per tier with the site's muted metal tokens. Tier reads

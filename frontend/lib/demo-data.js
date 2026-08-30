@@ -18,11 +18,10 @@ const hostels = [
 ].map(([id, name, population]) => ({ id, name, population }));
 
 const weeks = [
-  { id: "wk1", label: "Jan", startsOn: "2026-01-06" },
-  { id: "wk2", label: "Feb", startsOn: "2026-02-03" },
-  { id: "wk3", label: "Mar", startsOn: "2026-03-03" },
-  { id: "wk4", label: "Apr", startsOn: "2026-04-07" },
-  { id: "wk5", label: "May", startsOn: "2026-05-05" }
+  { id: "wk1", label: "Aug", startsOn: "2026-08-04" },
+  { id: "wk2", label: "Sept", startsOn: "2026-09-01" },
+  { id: "wk3", label: "Oct", startsOn: "2026-10-06" },
+  { id: "wk4", label: "Nov", startsOn: "2026-11-03" }
 ];
 
 // Per-hostel performance profile driving the demo submissions.

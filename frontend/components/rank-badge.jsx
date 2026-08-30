@@ -1,9 +1,15 @@
 "use client";
 
-// Top three get medal-tinted pills so the table stays consistent with the podium.
-const MEDAL_CLASS = { 1: "rank-pill-gold", 2: "rank-pill-silver", 3: "rank-pill-bronze" };
+import RibbonMedal from "@/components/ribbon-medal";
 
+// Top three get the flat ribbon medals; everyone else keeps a plain numbered pill.
 export default function RankBadge({ rank }) {
-  const medal = MEDAL_CLASS[rank] || "rank-pill-default";
-  return <div className={`rank-pill ${medal}`}>{rank}</div>;
+  if (rank <= 3) {
+    return (
+      <div className="rank-medal">
+        <RibbonMedal rank={rank} size={40} />
+      </div>
+    );
+  }
+  return <div className="rank-pill rank-pill-default">{rank}</div>;
 }

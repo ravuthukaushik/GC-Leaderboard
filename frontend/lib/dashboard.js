@@ -59,6 +59,10 @@ function monthLabel(input) {
   }).format(new Date(input));
 }
 
+// Short month label for chart axes - periods are monthly, so derive the month
+// from the date rather than trusting a stored "Week N · …" label.
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+
 function numericHostelSort(left, right) {
   const leftNumber = Number.parseInt(String(left.name).replace(/\D+/g, ""), 10);
   const rightNumber = Number.parseInt(String(right.name).replace(/\D+/g, ""), 10);
@@ -150,10 +154,12 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
     : 0;
   const biggestClimber = [...leaderboard].sort((a, b) => b.momentumDelta - a.momentumDelta)[0] || null;
   const trendHostels = leaderboard.slice(0, 5).map((item) => item.name);
-  const trends = weeks.map((week) => {
+  const trends = weeks.map((week, weekIndex) => {
     const scores = scoresByWeek[week.id] || [];
     const row = {
-      label: week.label,
+      // Cup runs Aug onward: label periods sequentially from August regardless of
+      // the stored period dates (Aug, Sept, Oct, Nov, ...).
+      label: MONTHS[(7 + weekIndex) % 12],
       averageScore: scores.length
         ? round(scores.reduce((sum, score) => sum + score.totalScore, 0) / scores.length)
         : 0
@@ -167,11 +173,11 @@ function buildPayload({ hostels, weeks, scoresByWeek, activeWeekId, usingDemoDat
     return row;
   });
 
-  // Restrained, distinct ramp aligned to the design palette (blue · green · clay
-  // · plum · rose) so the trend lines read as one system, not neon spaghetti.
+  // CVD-validated categorical order (blue · orange · green · violet · magenta),
+  // separated for colour-blind readers and paired with a legend + markers.
   const trendSeries = trendHostels.map((name, index) => ({
     key: name,
-    color: ["#3B7EA1", "#6A9E52", "#CD8551", "#8A6D9E", "#C56B7A"][index % 5]
+    color: ["#2A78D6", "#EB6834", "#1BAF7A", "#4A3AA7", "#E87BA4"][index % 5]
   }));
 
   const breakdown = leaderboard.map((item) => ({
