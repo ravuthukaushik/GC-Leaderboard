@@ -62,9 +62,10 @@ export default function DashboardContent({
 
   return (
     <main className="page-shell dashboard-content-shell">
-      <Navbar viewer={viewer} onSignOut={onSignOut} />
-
-      {showHero ? <TrophyHero top3={podiumTop3} /> : null}
+      <div className="hero-lock">
+        <Navbar viewer={viewer} onSignOut={onSignOut} />
+        {showHero ? <TrophyHero top3={podiumTop3} /> : null}
+      </div>
 
       {/* The leaderboard podium now rises out of the cup inside the hero; only the
           analytics view (no hero) needs the standalone podium. */}

@@ -317,6 +317,28 @@ textarea {
   padding: 4px 2px 0;
 }
 
+/* The masthead stays pinned through the hero (logo + admin controls visible),
+   then scrolls away once the hero-lock (navbar + hero) ends. */
+.hero-lock {
+  position: relative;
+}
+
+.hero-lock .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding-top: 16px;
+}
+
+.hero-lock .topbar::before {
+  content: "";
+  position: absolute;
+  inset: -16px -50vw 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--paper) 45%, rgba(250, 247, 240, 0));
+}
+
 .masthead-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1727,7 +1749,7 @@ textarea {
 
 /* ── 3D variant: scroll range for rotate → dismantle → portal → podium rising ── */
 .tphero3d {
-  height: 150vh;
+  height: 135vh;
 }
 
 /* Break the pinned scene out of the 1280px centred container to full viewport
@@ -1767,7 +1789,7 @@ textarea {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 15vh;
+  padding-bottom: 19vh;
   pointer-events: none;
 }
 
