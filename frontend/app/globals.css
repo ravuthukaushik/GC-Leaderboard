@@ -1750,6 +1750,13 @@ textarea {
 /* ── 3D variant: scroll range for rotate → dismantle → portal → podium rising ── */
 .tphero3d {
   height: 135vh;
+  /* Start higher (tucked under the masthead) so the title + trophy sit up in the
+     un-scrolled frame too; once pinned, top:0 governs, so the settled podium
+     positions are unaffected. */
+  margin-top: -9vh;
+  /* Pull the following content (tabs + panels) up so, once the pin releases, the
+     tabs sit just beneath the stage - the same gap the analytics podium has. */
+  margin-bottom: -23.9vh;
 }
 
 /* Break the pinned scene out of the 1280px centred container to full viewport
@@ -1789,12 +1796,13 @@ textarea {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-bottom: 19vh;
+  padding-bottom: 25vh;
   pointer-events: none;
 }
 
+/* Match the standalone (analytics) podium exactly - no shrink. */
 .tphero3d__podium .gcp__stage {
-  transform: scale(0.92);
+  transform: none;
 }
 
 .tphero3d__podium .gcp__col {
@@ -1803,7 +1811,7 @@ textarea {
 
 .tphero3d .tphero__copy {
   position: absolute;
-  top: clamp(9vh, 13vh, 18vh);
+  top: 15vh; /* raised slightly; gaps below stay identical to the analytics podium */
   left: 0;
   right: 0;
   text-align: center;

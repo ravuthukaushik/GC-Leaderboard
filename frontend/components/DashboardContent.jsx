@@ -43,6 +43,38 @@ export default function DashboardContent({
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [activeTab]);
 
+  // The masthead holds its exact spot through the hero, then the leaderboard
+  // pushes it up 1:1 as the tab bar reaches it (sticky alone would keep it
+  // floating over the table for the rest of the tall hero section).
+  useEffect(() => {
+    if (!showHero) return undefined;
+    const bar = document.querySelector(".hero-lock .topbar");
+    const tabsEl = navRef.current;
+    if (!bar || !tabsEl) return undefined;
+
+    let ticking = false;
+    const apply = () => {
+      ticking = false;
+      const barBottom = bar.offsetHeight + 10; // small breathing gap
+      const push = Math.min(0, tabsEl.getBoundingClientRect().top - barBottom);
+      bar.style.transform = push < 0 ? `translateY(${push.toFixed(1)}px)` : "";
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(apply);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
+    window.addEventListener("resize", onScroll);
+    apply();
+    return () => {
+      window.removeEventListener("scroll", onScroll, { capture: true });
+      window.removeEventListener("resize", onScroll);
+      bar.style.transform = "";
+    };
+  }, [showHero, activeTab]);
+
   // GSAP-driven sliding active indicator (measures the active tab and moves the
   // single pill to it - smooth on change, instant on first paint).
   useLayoutEffect(() => {

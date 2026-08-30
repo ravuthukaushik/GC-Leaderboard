@@ -112,6 +112,7 @@ export default function TrophyHero3D({ top3 = [] }) {
     // ── geometry ─────────────────────────────────────────────────────────────
     const trophy = new THREE.Group();
     trophy.scale.setScalar(0.82); // leave breathing room around the whole award
+    trophy.position.y = 0.16; // sit slightly higher in frame (not hugging the bottom)
     scene.add(trophy);
     const parts = {};
 
@@ -262,8 +263,9 @@ export default function TrophyHero3D({ top3 = [] }) {
       parts.cup.position.set(0, 0, dp * 0.12);
 
       // 3 · portal - dolly the camera forward + down through the rim into the cup
-      camera.position.set(lerp(CAM_START.x, 0.0, cp), lerp(CAM_START.y, 0.72, cp), lerp(CAM_START.z, 0.32, cp));
-      tmpLook.set(lerp(CAM_LOOK_START.x, 0, cp), lerp(CAM_LOOK_START.y, 0.08, cp), lerp(CAM_LOOK_START.z, 0, cp));
+      // End targets include the trophy's +0.34 lift so the push still lands inside the bowl.
+      camera.position.set(lerp(CAM_START.x, 0.0, cp), lerp(CAM_START.y, 0.88, cp), lerp(CAM_START.z, 0.32, cp));
+      tmpLook.set(lerp(CAM_LOOK_START.x, 0, cp), lerp(CAM_LOOK_START.y, 0.24, cp), lerp(CAM_LOOK_START.z, 0, cp));
       camera.lookAt(tmpLook);
 
       // 4 · bloom at the rim, then the cup canvas fades so the podium can rise out.
