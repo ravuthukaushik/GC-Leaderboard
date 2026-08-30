@@ -889,19 +889,11 @@ textarea {
 }
 
 /* Spotlight bloom behind the champion card (soft green → gold) */
+/* The champion once sat in a green/gold halo; it read as a smudge over the
+   contour terrain, so the bloom is gone. The element stays (the podium reveal
+   animates its opacity) but paints nothing. */
 .gcp__spotlight {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: 190%;
-  height: 152%;
-  transform: translate(-50%, -50%);
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(closest-side, rgba(61, 107, 79, 0.16), transparent 72%),
-    radial-gradient(closest-side, rgba(184, 144, 74, 0.12), transparent 62%);
-  filter: blur(10px);
+  display: none;
 }
 
 /* Floating card */
@@ -925,7 +917,8 @@ textarea {
   width: clamp(196px, 26vw, 256px);
   padding: 42px 24px 42px;
   border-color: color-mix(in srgb, var(--metal-gold) 44%, var(--line));
-  box-shadow: 0 4px 10px rgba(64, 48, 27, 0.06), 0 44px 74px -30px rgba(155, 122, 20, 0.5);
+  /* Neutral lift, no gold bloom - the warm spread read as a glow around the card. */
+  box-shadow: 0 4px 10px rgba(64, 48, 27, 0.06), 0 30px 52px -32px rgba(64, 48, 27, 0.34);
 }
 
 .gcp__seal {
@@ -939,34 +932,43 @@ textarea {
   width: 82%;
   margin-top: clamp(8px, 1.4vh, 14px);
   display: grid;
-  place-items: center;
-  border-radius: 16px 16px 0 0;
-  background: linear-gradient(180deg, var(--surface-1), var(--paper-2));
-  border: 1px solid var(--line);
-  border-bottom: none;
-  box-shadow: inset 0 14px 22px -16px rgba(64, 48, 27, 0.2);
+  place-items: start center;
+  padding-top: clamp(10px, 1.4vh, 15px);
+  border-radius: 14px 14px 0 0;
+  /* Elevation tier, not a solid plinth: the paper only barely lifts off the
+     terrain at the summit and dissolves downward, so the contour field reads
+     straight through the base. Ranking = height = elevation. */
+  /* Flat tonal step - no gradient, no border, no inset. The steps read as quiet
+     blocks of paper tone, letting the cards and the terrain carry the page. */
+  /* One solid tone across all three steps - the height alone carries the ranking,
+     so the podium reads as a single object rather than three tinted blocks. Soft
+     sage picks up the contour green, sitting cool against the cream paper. */
+  background: #dce3db;
+  border: none;
+  box-shadow: none;
 }
 
 .gcp__col--1 .gcp__stand {
   height: clamp(72px, 10vh, 112px);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--metal-gold) 16%, var(--surface-1)), var(--paper-2));
-  border-color: color-mix(in srgb, var(--metal-gold) 34%, var(--line));
 }
 
 .gcp__col--2 .gcp__stand { height: clamp(54px, 7.5vh, 84px); }
 .gcp__col--3 .gcp__stand { height: clamp(40px, 6vh, 64px); }
 
+/* Numeral reads as a map label on the tier - small, tracked out, quiet. */
 .gcp__stand-num {
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 3.2vw, 2.1rem);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.04em;
+  text-indent: 0.04em;
+  opacity: 0.85;
 }
 
-.gcp__col--1 .gcp__stand-num { color: var(--metal-gold); }
-.gcp__col--2 .gcp__stand-num { color: var(--metal-silver); }
-.gcp__col--3 .gcp__stand-num { color: var(--metal-bronze); }
+/* One colour for all three numerals, matching the single-tone steps - the medals
+   on the cards already carry gold/silver/bronze, so repeating it here is noise. */
+.gcp__stand-num { color: var(--brand-deep); }
 
 .gcp__name {
   margin: 0;
@@ -1025,7 +1027,8 @@ textarea {
   .gcp__col--1 .gcp__stand { height: clamp(64px, 12vh, 100px); }
   .gcp__col--2 .gcp__stand { height: clamp(48px, 9vh, 78px); }
   .gcp__col--3 .gcp__stand { height: clamp(36px, 7vh, 60px); }
-  .gcp__stand-num { font-size: clamp(1.2rem, 6vw, 1.8rem); }
+  .gcp__stand-num { font-size: clamp(1.25rem, 5.4vw, 1.7rem); letter-spacing: 0.03em; text-indent: 0.03em; }
+  .gcp__stand { padding-top: 9px; }
 }
 
 /* ─── CATEGORY BADGES ─── */
@@ -1448,6 +1451,78 @@ textarea {
 .judging-content-wrapper {
   overflow: hidden;
   margin-top: 12px;
+}
+
+/* ─── PREVIOUS YEARS' WINNERS (same collapsible shell as the criteria) ─── */
+.winners-section {
+  margin-top: 1.5rem;
+}
+
+.winners-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.winners-trophy {
+  flex-shrink: 0;
+}
+
+.winners-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 4px;
+}
+
+/* Year · rule · winner - a roll of honour, not a table. */
+.winners-row {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 15px 24px;
+}
+
+.winners-row + .winners-row {
+  border-top: 1px solid var(--line);
+}
+
+.winners-year {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: 0.01em;
+  color: var(--text-strong);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dotted leader, like an index page */
+.winners-rule {
+  flex: 1;
+  height: 0;
+  border-bottom: 1px dotted var(--line);
+  transform: translateY(-4px);
+}
+
+.winners-hostel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.02rem;
+  color: var(--brand-deep);
+}
+
+.winners-row-trophy {
+  transform: translateY(1px);
+}
+
+@media (max-width: 560px) {
+  .winners-row { padding: 13px 16px; gap: 10px; }
+  .winners-year,
+  .winners-hostel { font-size: 0.94rem; }
 }
 
 .judging-table-shell {

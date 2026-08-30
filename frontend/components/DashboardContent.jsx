@@ -8,6 +8,7 @@ import AnalyticsPanel from "@/components/analytics-panel";
 import AdminPanel from "@/components/admin-panel";
 import HostelDataPanel from "@/components/hostel-data-panel";
 import JudgingCriteria from "@/components/judging-criteria";
+import PastWinners from "@/components/past-winners";
 import PodiumCarousel from "@/components/podium-carousel";
 import TrophyHero from "@/components/trophy-hero";
 import { hasIntroPlayed } from "@/lib/intro-film";
@@ -139,6 +140,7 @@ export default function DashboardContent({
       </div>
 
       <JudgingCriteria />
+      <PastWinners />
     </main>
   );
 }
