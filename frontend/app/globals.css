@@ -177,9 +177,8 @@ body::before {
   stroke-width: 1.1;
   stroke-linejoin: round;
   stroke-linecap: round;
-  /* Contours near the cursor are pushed outward (see topo-background); an eased
-     transition lets each one settle smoothly as the pointer sweeps past. */
-  transition: transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Cursor reaction is per-vertex geometry deformation (see topo-background), so
+     the easing lives in the rAF lerp - no CSS transition to fight it. */
 }
 /* Nearer bands (which travel more with the cursor) read a touch stronger, giving
    the field depth without ever competing with cards/tables. */
@@ -322,22 +321,9 @@ textarea {
   padding-top: 16px;
 }
 
-.hero-lock .topbar::before {
-  content: "";
-  position: absolute;
-  inset: -16px -50vw 0;
-  z-index: -1;
-  pointer-events: none;
-  /* A soft paper fade (never a solid top) so the topographic contours read right
-     up to the edge - no white bar, no hard "cut" line - while still lifting the
-     pinned masthead's legibility as the podium scrolls beneath it. */
-  background: linear-gradient(
-    180deg,
-    rgba(250, 247, 240, 0.55) 0%,
-    rgba(250, 247, 240, 0.32) 55%,
-    rgba(250, 247, 240, 0) 100%
-  );
-}
+/* No scrim behind the masthead: the contour field is faint enough that the bold
+   lockup and pill controls stay legible on their own, and any paper wash - however
+   soft - reads as a faded bar against the terrain at the top edge. */
 
 .masthead-meta {
   display: flex;
