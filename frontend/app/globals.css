@@ -1757,6 +1757,9 @@ textarea {
   /* Pull the following content (tabs + panels) up so, once the pin releases, the
      tabs sit just beneath the stage - the same gap the analytics podium has. */
   margin-bottom: -23.9vh;
+  /* The whole hero is decorative; the pinned overlay must never block clicks on
+     the tabs/leaderboard the negative margin pulls up beneath it. */
+  pointer-events: none;
 }
 
 /* Break the pinned scene out of the 1280px centred container to full viewport
@@ -1765,6 +1768,9 @@ textarea {
   display: block;
   width: 100vw;
   margin-left: calc(50% - 50vw);
+  /* Purely decorative full-screen layer - never intercept clicks meant for the
+     tabs/leaderboard that the negative margin pulls up beneath it. */
+  pointer-events: none;
 }
 
 .tphero3d__canvas {

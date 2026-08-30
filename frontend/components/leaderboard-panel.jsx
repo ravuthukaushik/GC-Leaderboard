@@ -2,11 +2,8 @@
 
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import RankBadge from "@/components/rank-badge";
 import BorderGlow from "@/components/BorderGlow";
-
-if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
 function SegmentBar({ hostel }) {
   const segments = [
@@ -31,9 +28,10 @@ function SegmentBar({ hostel }) {
 export default function LeaderboardPanel({ payload }) {
   const rootRef = useRef(null);
 
-  // Rows fade/slide in with a short stagger as the table scrolls into view
-  // (GSAP ScrollTrigger). A last-resort safety net reveals them if the ticker is
-  // ever throttled so the table can never be stranded hidden.
+  // Rows fade/slide in with a short stagger when the table becomes visible. An
+  // IntersectionObserver is used (not ScrollTrigger) because its scroll-position
+  // math is unreliable beneath the tall pinned hero - the rows were only showing
+  // once you hit the very end of the page. A safety net reveals them regardless.
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return undefined;
@@ -45,18 +43,26 @@ export default function LeaderboardPanel({ payload }) {
       return undefined;
     }
     gsap.set(rows, { opacity: 0, y: 12 });
-    const st = ScrollTrigger.create({
-      trigger: root,
-      start: "top 82%",
-      once: true,
-      onEnter: () => gsap.to(rows, { opacity: 1, y: 0, duration: 0.5, stagger: 0.045, ease: "power2.out" })
-    });
+    const reveal = () => gsap.to(rows, { opacity: 1, y: 0, duration: 0.5, stagger: 0.045, ease: "power2.out" });
+    let done = false;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!done && entries.some((e) => e.isIntersecting)) {
+          done = true;
+          reveal();
+          io.disconnect();
+        }
+      },
+      { threshold: 0.08 }
+    );
+    io.observe(root);
+    // Safety: reveal even if the observer never fires (e.g. throttled ticker).
     const safety = window.setTimeout(() => {
-      if (rows[0] && getComputedStyle(rows[0]).opacity === "0") settle();
-    }, 8000);
+      if (!done && rows[0] && getComputedStyle(rows[0]).opacity === "0") settle();
+    }, 3000);
     return () => {
       window.clearTimeout(safety);
-      st.kill();
+      io.disconnect();
       settle();
     };
   }, [payload]);
