@@ -1,4 +1,4 @@
-// Green Cup scoring rubric — basket weightages.
+// Green Cup scoring rubric - basket weightages.
 // Core baskets sum to 100 (Electricity 10 + Water 5 + Waste 30 + Representation 20
 // + Events 30 + Attendance 5); SOP-listed and new/unique initiatives are pure
 // bonus points on top.

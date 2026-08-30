@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import Navbar from "@/components/navbar";
 import LeaderboardPanel from "@/components/leaderboard-panel";
@@ -37,8 +37,14 @@ export default function DashboardContent({
   const indicatorRef = useRef(null);
   const mountedRef = useRef(false);
 
+  // Switching tabs must land at the top - otherwise leaving the tall leaderboard
+  // hero scrolled-down drops you at the bottom of a shorter tab.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [activeTab]);
+
   // GSAP-driven sliding active indicator (measures the active tab and moves the
-  // single pill to it — smooth on change, instant on first paint).
+  // single pill to it - smooth on change, instant on first paint).
   useLayoutEffect(() => {
     const nav = navRef.current;
     const indicator = indicatorRef.current;
@@ -58,9 +64,11 @@ export default function DashboardContent({
     <main className="page-shell dashboard-content-shell">
       <Navbar viewer={viewer} onSignOut={onSignOut} />
 
-      {showHero ? <TrophyHero /> : null}
+      {showHero ? <TrophyHero top3={podiumTop3} /> : null}
 
-      {showPodium ? <PodiumCarousel top3={podiumTop3} /> : null}
+      {/* The leaderboard podium now rises out of the cup inside the hero; only the
+          analytics view (no hero) needs the standalone podium. */}
+      {showPodium && !showHero ? <PodiumCarousel top3={podiumTop3} /> : null}
 
       <nav className="segmented" role="tablist" aria-label="Dashboard views" ref={navRef}>
         <span className="segmented-indicator" ref={indicatorRef} aria-hidden="true" />

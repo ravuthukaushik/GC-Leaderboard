@@ -10,7 +10,7 @@ const criteria = [
     parameter: "Electricity",
     source: "EMD",
     scoring:
-      "Consumption (10): relative — lowest per-capita monthly consumption scores highest",
+      "Consumption (10): relative - lowest per-capita monthly consumption scores highest",
     weight: "10"
   },
   {
@@ -24,7 +24,7 @@ const criteria = [
     parameter: "Waste",
     source: "PHO",
     scoring:
-      "Mess waste (10): relative — lowest per-capita mess waste scores highest\nFood Waste App + staff training (5): 5 if app used regularly, else 0\nFour-bin mess segregation (5): 5 if implemented, else 0\nSegregation signage (5): share of dustbins with proper signage\nWaste-reduction initiative (5): 5 if at least one, else 0",
+      "Mess waste (10): relative - lowest per-capita mess waste scores highest\nFood Waste App + staff training (5): 5 if app used regularly, else 0\nFour-bin mess segregation (5): 5 if implemented, else 0\nSegregation signage (5): share of dustbins with proper signage\nWaste-reduction initiative (5): 5 if at least one, else 0",
     weight: "30"
   },
   {

@@ -94,7 +94,7 @@ export default function AnalyticsPanel({ payload }) {
           glowRadius={14}
           glowIntensity={0.26}
           coneSpread={22}
-          colors={["#3B7EA1", "#3D6B4F", "#6A9E52"]}
+          colors={["#2A78D6", "#3D6B4F", "#1BAF7A"]}
           fillOpacity={0.08}
         >
           <motion.article
@@ -149,7 +149,7 @@ export default function AnalyticsPanel({ payload }) {
           glowRadius={14}
           glowIntensity={0.26}
           coneSpread={22}
-          colors={["#3D6B4F", "#3B7EA1", "#6A9E52"]}
+          colors={["#3D6B4F", "#2A78D6", "#1BAF7A"]}
           fillOpacity={0.08}
         >
           <motion.article
@@ -169,16 +169,16 @@ export default function AnalyticsPanel({ payload }) {
                 <BarChart data={payload.breakdown}>
                   <defs>
                     <linearGradient id="barElectricity" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#5296B8" />
-                      <stop offset="100%" stopColor="#3B7EA1" />
+                      <stop offset="0%" stopColor="#4F92E6" />
+                      <stop offset="100%" stopColor="#2A78D6" />
                     </linearGradient>
                     <linearGradient id="barWaste" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#7DB169" />
-                      <stop offset="100%" stopColor="#6A9E52" />
+                      <stop offset="0%" stopColor="#37C793" />
+                      <stop offset="100%" stopColor="#1BAF7A" />
                     </linearGradient>
                     <linearGradient id="barEvents" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#DBA070" />
-                      <stop offset="100%" stopColor="#CD8551" />
+                      <stop offset="0%" stopColor="#F4834F" />
+                      <stop offset="100%" stopColor="#EB6834" />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
@@ -206,7 +206,7 @@ export default function AnalyticsPanel({ payload }) {
         glowRadius={14}
         glowIntensity={0.28}
         coneSpread={24}
-        colors={["#3B7EA1", "#6A9E52", "#3D6B4F"]}
+        colors={["#2A78D6", "#1BAF7A", "#3D6B4F"]}
         fillOpacity={0.08}
       >
         <motion.section
@@ -256,8 +256,8 @@ export default function AnalyticsPanel({ payload }) {
                     <stop offset="100%" stopColor="#3D6B4F" />
                   </linearGradient>
                   <linearGradient id="compareRight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#5296B8" />
-                    <stop offset="100%" stopColor="#3B7EA1" />
+                    <stop offset="0%" stopColor="#4F92E6" />
+                    <stop offset="100%" stopColor="#2A78D6" />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
