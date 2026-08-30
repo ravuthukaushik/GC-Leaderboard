@@ -277,13 +277,7 @@ export default function TrophyHero3D({ top3 = [] }) {
       }
       canvas.style.opacity = (1 - smoothstep(0.52, 0.63, p)).toFixed(3);
 
-      // 4b · the title slides down from the top to sit just above the emerging
-      //      podium, so the settled state has no big empty gap between them.
-      const copyEl = copyRef.current;
-      if (copyEl) {
-        const drop = smoothstep(0.18, 0.72, p);
-        copyEl.style.transform = `translateY(${(drop * 8).toFixed(1)}vh)`;
-      }
+      // 4b · the title stays fixed at the top (matching the standalone podium view).
 
       // 5 · THE PODIUM RISES OUT OF THE CUP - #1 first, then #2/#3 from behind #1,
       //     all scrubbed by the same scroll progress.
