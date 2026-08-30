@@ -103,10 +103,19 @@ export default function TrophyHero3D({ top3 = [] }) {
     const rim = new THREE.DirectionalLight(0xbfe3c8, 1.4);
     rim.position.set(-3.5, 1.5, -3.2);
     scene.add(rim);
+    // A tight warm kicker low on the opposite side: separates the stem and base
+    // tiers from the background and puts a second highlight on the handles.
+    const kicker = new THREE.DirectionalLight(0xffe9bd, 1.15);
+    kicker.position.set(-2.2, -1.6, 2.6);
+    scene.add(kicker);
 
     // ── materials ──────────────────────────────────────────────────────────
-    const gold = new THREE.MeshStandardMaterial({ color: 0xb8904a, metalness: 1.0, roughness: 0.28, envMapIntensity: 1.1 });
-    const goldDark = new THREE.MeshStandardMaterial({ color: 0x9a7a38, metalness: 1.0, roughness: 0.34, envMapIntensity: 1.0 });
+    // Polished gold: low roughness + a strong environment gives real specular
+    // travel across the curves, so the form reads as metal rather than flat colour.
+    const gold = new THREE.MeshStandardMaterial({ color: 0xc79a4e, metalness: 1.0, roughness: 0.16, envMapIntensity: 1.55 });
+    const goldDark = new THREE.MeshStandardMaterial({ color: 0x9a7a38, metalness: 1.0, roughness: 0.3, envMapIntensity: 1.25 });
+    // Brighter, softer bloom for the rim bead and nameplate band - catches the key.
+    const goldBright = new THREE.MeshStandardMaterial({ color: 0xe0b45f, metalness: 1.0, roughness: 0.12, envMapIntensity: 1.7 });
     const goldInner = new THREE.MeshStandardMaterial({ color: 0xcaa24a, metalness: 1.0, roughness: 0.4, side: THREE.BackSide, envMapIntensity: 0.9 });
     const green = new THREE.MeshStandardMaterial({ color: 0x3d6b4f, metalness: 0.1, roughness: 0.55, emissive: 0x1f3a2a, emissiveIntensity: 0.35 });
 
@@ -133,19 +142,38 @@ export default function TrophyHero3D({ top3 = [] }) {
     const bowl = new THREE.Mesh(bowlGeo, gold);
     // second material pass for the interior so the cavity reads when we fly in
     const bowlInner = new THREE.Mesh(bowlGeo, goldInner);
+    // Bead around the lip - a single bright specular line that defines the rim.
+    const rimBead = new THREE.Mesh(new THREE.TorusGeometry(0.995, 0.022, 16, 160), goldBright);
+    rimBead.rotation.x = Math.PI / 2;
+    rimBead.position.y = 1.005;
     const cup = new THREE.Group();
-    cup.add(bowl, bowlInner);
+    cup.add(bowl, bowlInner, rimBead);
     parts.cup = cup;
     trophy.add(cup);
 
-    // Green sprig inside the cup - the "Green" in Green Cup (bud on a slim stalk).
+    // Green sprig rising out of the cup - the "Green" in Green Cup. The stalk is
+    // long enough to clear the rim (y ≈ 1.0) so it reads as a seedling growing out
+    // of the trophy, not a bud stranded on the lip.
     const sprig = new THREE.Group();
-    const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.028, 0.95, 12), green);
-    stalk.position.y = 0.55;
-    const bud = new THREE.Mesh(new THREE.SphereGeometry(0.12, 20, 16), green);
-    bud.scale.set(0.7, 1.35, 0.7);
-    bud.position.y = 1.05;
-    sprig.add(stalk, bud);
+    // Sized in geometry, not group scale - the dismantle overwrites .scale each
+    // frame, so a scaled-down group would snap back to full size mid-film.
+    const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.024, 1.14, 14), green);
+    stalk.position.y = 0.68;
+    const bud = new THREE.Mesh(new THREE.SphereGeometry(0.082, 20, 16), green);
+    bud.scale.set(0.72, 1.5, 0.72);
+    bud.position.y = 1.31;
+
+    // Two leaves - flattened spheres, angled up and out from the stalk.
+    const leafGeo = new THREE.SphereGeometry(0.082, 18, 14);
+    const makeLeaf = (dir) => {
+      const leaf = new THREE.Mesh(leafGeo, green);
+      leaf.scale.set(1.5, 0.62, 0.2);      // long, thin blade
+      leaf.position.set(dir * 0.1, 1.12, 0);
+      leaf.rotation.z = dir * 0.62;         // sweep upward from the stem
+      leaf.rotation.y = dir * 0.32;         // turn slightly out of plane
+      return leaf;
+    };
+    sprig.add(stalk, bud, makeLeaf(-1), makeLeaf(1));
     parts.sprig = sprig;
     trophy.add(sprig);
 
@@ -161,29 +189,64 @@ export default function TrophyHero3D({ top3 = [] }) {
     parts.stem = stem;
     trophy.add(stem);
 
-    // Base tier 1 (upper plinth) and tier 2 (widest, bottom).
-    const base1 = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.42, 0.16, 40), gold);
+    // Base tiers as chamfered lathes - the small 45° breaks at each edge catch the
+    // key light as bright lines, which is what sells cast metal (a plain cylinder's
+    // hard edge just goes dark).
+    const tier = (pts, mat) => {
+      let g = new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), 72);
+      g = mergeVertices(g);
+      g.computeVertexNormals();
+      return new THREE.Mesh(g, mat);
+    };
+
+    // Tier 1 (upper plinth): chamfered top and bottom.
+    const base1 = tier(
+      [[0, -0.08], [0.38, -0.08], [0.42, -0.045], [0.42, 0.04], [0.335, 0.08], [0, 0.08]],
+      gold
+    );
     base1.position.y = -0.72;
     parts.base1 = base1;
     trophy.add(base1);
 
-    const base2 = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.62, 0.17, 44), goldDark);
+    // Tier 2 (widest, bottom): a deeper skirt with a stepped foot.
+    const base2 = tier(
+      [[0, -0.085], [0.6, -0.085], [0.635, -0.05], [0.62, 0.015], [0.52, 0.06], [0.48, 0.085], [0, 0.085]],
+      goldDark
+    );
     base2.position.y = -0.9;
     parts.base2 = base2;
     trophy.add(base2);
 
-    // Handles - complete ring "ears" on each side (inner arc tucks behind the bowl,
-    // outer arc reads as a full loop handle).
-    const handleGeo = new THREE.TorusGeometry(0.27, 0.055, 14, 40);
+    // Nameplate band around the upper plinth - a bright ring that reads as an
+    // engraved collar and ties the base back to the rim bead.
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.425, 0.016, 14, 96), goldBright);
+    collar.rotation.x = Math.PI / 2;
+    collar.position.y = -0.735;
+    base1.add(collar);
+    collar.position.y = -0.015; // local to base1, so it travels with the tier
+
+    // Handles - swept C-curve "ears" (a tube along a spline), tapering where they
+    // meet the bowl, so they read as cast loving-cup handles rather than flat rings.
+    const handleCurve = new THREE.CatmullRomCurve3(
+      [
+        [-0.20, 0.335, 0], [0.075, 0.365, 0], [0.275, 0.235, 0], [0.335, 0.01, 0],
+        [0.265, -0.215, 0], [0.055, -0.345, 0], [-0.20, -0.325, 0]
+      ].map(([x, y, z]) => new THREE.Vector3(x, y, z)),
+      false,
+      "catmullrom",
+      0.4
+    );
+    const handleGeo = new THREE.TubeGeometry(handleCurve, 96, 0.05, 18, false);
     const handleL = new THREE.Mesh(handleGeo, gold);
-    handleL.position.set(-0.92, 0.5, 0);
-    handleL.rotation.y = 0.4;
+    handleL.position.set(-0.79, 0.5, 0);
+    // Mirrored by a half turn (the curve lives in the z = 0 plane), so the open
+    // side always faces the bowl.
+    handleL.rotation.y = Math.PI;
     parts.handleL = handleL;
     trophy.add(handleL);
 
     const handleR = new THREE.Mesh(handleGeo, gold);
-    handleR.position.set(0.92, 0.5, 0);
-    handleR.rotation.y = -0.4;
+    handleR.position.set(0.79, 0.5, 0);
     parts.handleR = handleR;
     trophy.add(handleR);
 
