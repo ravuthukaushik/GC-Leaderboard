@@ -36,13 +36,15 @@ const VH = 900;
 const PAD = 120; // sample past the edges so contours run off-frame, never float
 
 // --- Deterministic value noise (integer hash → identical SSR + client) --------
-const SEED = 1337;
+const SEED = 20481;
 function hash(x, y) {
   let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(SEED, 362437)) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
 }
-const smooth = (t) => t * t * (3 - 2 * t);
+// Quintic fade (6t^5-15t^4+10t^3): C2-continuous, so the height field - and thus
+// the iso-contours - has no derivative kinks at cell boundaries = silky curves.
+const smooth = (t) => t * t * t * (t * (t * 6 - 15) + 10);
 function vnoise(x, y) {
   const xi = Math.floor(x);
   const yi = Math.floor(y);
@@ -74,24 +76,35 @@ function fbm(x, y) {
   return a / norm;
 }
 
-// Catmull-Rom → cubic bezier smoothing for a polyline (open or closed).
-function smoothPath(pts, closed) {
-  const n = pts.length;
-  if (n < 2) return "";
-  let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)} `;
-  const last = closed ? n : n - 1;
+// Catmull-Rom → cubic bezier smoothing over a FLAT coord array [x0,y0,x1,y1,...].
+// The same function serves build time and the per-frame cursor deformation, so a
+// contour's geometry never jumps the moment it starts reacting to the pointer.
+// One decimal, but ~5x faster than toFixed - this runs on every deformed vertex,
+// every frame, so the formatting cost is the hot path.
+const r1 = (v) => Math.round(v * 10) / 10;
+
+function pathFromFlat(a, n, closed) {
+  const cnt = n >> 1;
+  if (cnt < 2) return "";
+  // wrap for closed rings, clamp at the ends for open lines
+  const ix = closed
+    ? (i) => (((i % cnt) + cnt) % cnt) << 1
+    : (i) => (i < 0 ? 0 : i > cnt - 1 ? cnt - 1 : i) << 1;
+  const out = [`M ${r1(a[0])} ${r1(a[1])}`];
+  const last = closed ? cnt : cnt - 1;
   for (let i = 0; i < last; i++) {
-    const p0 = pts[(i - 1 + n) % n];
-    const p1 = pts[i % n];
-    const p2 = pts[(i + 1) % n];
-    const p3 = pts[(i + 2) % n];
-    const c1x = p1[0] + (p2[0] - (closed ? p0[0] : pts[Math.max(0, i - 1)][0])) / 6;
-    const c1y = p1[1] + (p2[1] - (closed ? p0[1] : pts[Math.max(0, i - 1)][1])) / 6;
-    const c2x = p2[0] - ((closed ? p3[0] : pts[Math.min(n - 1, i + 2)][0]) - p1[0]) / 6;
-    const c2y = p2[1] - ((closed ? p3[1] : pts[Math.min(n - 1, i + 2)][1]) - p1[1]) / 6;
-    d += `C ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)} `;
+    const i0 = ix(i - 1);
+    const i1 = ix(i);
+    const i2 = ix(i + 1);
+    const i3 = ix(i + 2);
+    const c1x = a[i1] + (a[i2] - a[i0]) / 6;
+    const c1y = a[i1 + 1] + (a[i2 + 1] - a[i0 + 1]) / 6;
+    const c2x = a[i2] - (a[i3] - a[i1]) / 6;
+    const c2y = a[i2 + 1] - (a[i3 + 1] - a[i1 + 1]) / 6;
+    out.push(`C ${r1(c1x)} ${r1(c1y)} ${r1(c2x)} ${r1(c2y)} ${r1(a[i2])} ${r1(a[i2 + 1])}`);
   }
-  return closed ? `${d}Z` : d;
+  if (closed) out.push("Z");
+  return out.join(" ");
 }
 
 // Marching-squares segment table (corner weights tl8 tr4 br2 bl1; edges
@@ -105,28 +118,35 @@ const SEG_TABLE = {
 
 // Extract stitched, smoothed contour paths at a set of thresholds.
 function buildContours() {
-  // A fine grid over LARGE features (low NS): many sample points per loop, so each
-  // smoothed contour comes out as a soft, near-circular blob - no sharp corners.
-  const COLS = 60;
-  const ROWS = 40;
+  // A VERY fine grid, sampled by WORLD position (not grid index) times a fixed
+  // frequency - so resolution controls only smoothness, never feature size. Many
+  // sample points per loop => Catmull-Rom yields long, silky-continuous curves.
+  const COLS = 168;
+  const ROWS = 114;
   const x0 = -PAD;
   const y0 = -PAD;
   const cw = (VW + PAD * 2) / COLS;
   const ch = (VH + PAD * 2) / ROWS;
-  const NS = 0.23; // noise scale - larger = smaller, tighter blobs
+  // Feature frequency in cycles-per-pixel; isotropic (same on both axes) so blobs
+  // read round. Tuned to keep the previous blob size regardless of grid density.
+  const K = 0.0105;
 
-  // Height field on grid nodes.
+  // Height field on grid nodes (world-position sampling).
   const V = [];
   for (let gy = 0; gy <= ROWS; gy++) {
     const row = [];
-    for (let gx = 0; gx <= COLS; gx++) row.push(fbm(gx * NS, gy * NS));
+    const wy = (y0 + gy * ch) * K;
+    for (let gx = 0; gx <= COLS; gx++) row.push(fbm((x0 + gx * cw) * K, wy));
     V.push(row);
   }
 
   // Many, closely-spaced elevation levels - tighter contour spacing fills the
   // field so there is little empty white space between rings.
   const thresholds = [];
-  for (let t = 0.27; t <= 0.77; t += 0.026) thresholds.push(Number(t.toFixed(3)));
+  // Range reaches further into the elevation extremes than the field's usual
+  // span, so the flat peak/basin interiors pick up a few inner rings instead of
+  // reading as empty circles - spacing between levels stays the same.
+  for (let t = 0.15; t <= 0.89; t += 0.029) thresholds.push(Number(t.toFixed(3)));
 
   const key = (p) => `${Math.round(p[0] * 10)}:${Math.round(p[1] * 10)}`;
 
@@ -187,14 +207,27 @@ function buildContours() {
       const closed = key(first) === key(lastP) || Math.hypot(first[0] - lastP[0], first[1] - lastP[1]) < Math.max(cw, ch);
       if (line.length < 3) continue;
       if (closed && line.length > 2) line.pop(); // drop duplicated closing point
-      const d = smoothPath(line, closed);
+      // Flat coords + bounding box: the pointer effect deforms these vertices
+      // individually, so every contour reacts and none ever slides as a slab.
+      const n = line.length * 2;
+      const pts = new Float64Array(n);
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      for (let k = 0; k < line.length; k++) {
+        const px = line[k][0];
+        const py = line[k][1];
+        pts[k * 2] = px;
+        pts[k * 2 + 1] = py;
+        if (px < minX) minX = px;
+        if (px > maxX) maxX = px;
+        if (py < minY) minY = py;
+        if (py > maxY) maxY = py;
+      }
+      const d = pathFromFlat(pts, n, closed);
       if (!d) continue;
-      // Centroid drives the localized cursor "spread": each contour is pushed
-      // away from the pointer by an amount that falls off with distance.
-      let sx = 0;
-      let sy = 0;
-      line.forEach((p) => { sx += p[0]; sy += p[1]; });
-      bands[ti % 3].push({ d, ti, cx: sx / line.length, cy: sy / line.length });
+      bands[ti % 3].push({ d, ti, pts, n, closed, minX, minY, maxX, maxY });
     }
   });
 
@@ -246,15 +279,18 @@ export default function TopoBackground() {
       });
     }
 
-    // LOCALIZED cursor spread - only the contours near the pointer react: each is
-    // pushed outward (away from the cursor) with a smooth distance falloff, so the
-    // terrain "spreads" open under the mouse while the rest stays perfectly still.
+    // LOCALIZED cursor spread, applied PER VERTEX. Each contour's points are pushed
+    // outward from the pointer with a smooth falloff and the curve is re-emitted, so
+    // the line bends open under the cursor like elastic terrain. Because the geometry
+    // itself deforms (rather than whole paths translating), every contour responds -
+    // including long sprawling ones, which now bend only where the cursor is near.
     const svgEl = root.querySelector(".topo__svg");
     const paths = Array.from(root.querySelectorAll(".topo__line"));
-    const cen = paths.map((p) => [parseFloat(p.dataset.cx), parseFloat(p.dataset.cy)]);
-    const R = 175;          // influence radius, in viewBox units (tight, local)
+    const data = bands.flat(); // same order as the rendered paths
+    const R = 190;          // influence radius, in viewBox units
     const R2 = R * R;
-    const PUSH = 26;        // max outward displacement at the cursor
+    const PUSH = 30;        // max outward displacement at the cursor
+    const scratch = new Float64Array(data.reduce((m, it) => Math.max(m, it.n), 0));
     const active = new Set();
     const mouse = { x: 0, y: 0, tx: 0, ty: 0, primed: false };
     let raf = null;
@@ -276,19 +312,41 @@ export default function TopoBackground() {
       // Gentle follow - a low lerp factor lets the spread trail the cursor softly.
       mouse.x += (mouse.tx - mouse.x) * 0.13;
       mouse.y += (mouse.ty - mouse.y) * 0.13;
+      const mx = mouse.x;
+      const my = mouse.y;
       const next = new Set();
-      for (let i = 0; i < cen.length; i++) {
-        const dx = cen[i][0] - mouse.x;
-        const dy = cen[i][1] - mouse.y;
-        const d2 = dx * dx + dy * dy;
-        if (d2 >= R2) continue;
-        const d = Math.sqrt(d2) || 0.0001;
-        const t = 1 - d / R;          // 1 at cursor → 0 at radius
-        const amt = (PUSH * t * t) / d;
-        paths[i].style.transform = `translate(${(dx * amt).toFixed(2)}px, ${(dy * amt).toFixed(2)}px)`;
-        next.add(i);
+      for (let i = 0; i < data.length; i++) {
+        const it = data[i];
+        // Cheap reject: cursor's influence circle can't reach this contour's box.
+        if (mx < it.minX - R || mx > it.maxX + R || my < it.minY - R || my > it.maxY + R) continue;
+        const pts = it.pts;
+        const n = it.n;
+        let touched = false;
+        for (let k = 0; k < n; k += 2) {
+          const px = pts[k];
+          const py = pts[k + 1];
+          const dx = px - mx;
+          const dy = py - my;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < R2) {
+            const d = Math.sqrt(d2) || 0.0001;
+            const t = 1 - d / R;              // 1 at cursor → 0 at the radius
+            const amt = (PUSH * t * t) / d;   // smooth, vanishes at the rim
+            scratch[k] = px + dx * amt;
+            scratch[k + 1] = py + dy * amt;
+            touched = true;
+          } else {
+            scratch[k] = px;
+            scratch[k + 1] = py;
+          }
+        }
+        if (touched) {
+          paths[i].setAttribute("d", pathFromFlat(scratch, n, it.closed));
+          next.add(i);
+        }
       }
-      active.forEach((i) => { if (!next.has(i)) paths[i].style.transform = ""; });
+      // Restore anything that just left the cursor's reach to its original curve.
+      active.forEach((i) => { if (!next.has(i)) paths[i].setAttribute("d", data[i].d); });
       active.clear();
       next.forEach((i) => active.add(i));
 
@@ -305,7 +363,7 @@ export default function TopoBackground() {
       if (!raf) raf = requestAnimationFrame(tick);
     };
     const onLeave = () => {
-      active.forEach((i) => { paths[i].style.transform = ""; });
+      active.forEach((i) => { paths[i].setAttribute("d", data[i].d); });
       active.clear();
       if (raf) { cancelAnimationFrame(raf); raf = null; }
       mouse.primed = false;
@@ -335,7 +393,7 @@ export default function TopoBackground() {
           {bands.map((band, bi) => (
             <g className={`topo__band topo__band--${bi}`} key={bi}>
               {band.map((p, i) => (
-                <path className="topo__line" key={i} d={p.d} data-cx={p.cx.toFixed(1)} data-cy={p.cy.toFixed(1)} />
+                <path className="topo__line" key={i} d={p.d} />
               ))}
             </g>
           ))}
