@@ -30,6 +30,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { prefersReducedMotion } from "@/lib/intro";
 import RibbonMedal from "@/components/ribbon-medal";
+import { hasIntroPlayed, markIntroPlayed } from "@/lib/intro-film";
 
 const smoothstep = (a, b, x) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
@@ -240,13 +241,20 @@ export default function TrophyHero3D({ top3 = [] }) {
     // ── the scrubbed timeline: everything is a function of p ────────────────
     const tmpLook = new THREE.Vector3();
     const applyProgress = (p) => {
-      const rp = smoothstep(0.0, 0.2, p); // rotate
-      const dp = smoothstep(0.2, 0.42, p); // dismantle
-      const cp = smoothstep(0.42, 0.58, p); // camera push into the cup
+      // AUTOPLAY INTRO (plays like a video on every load):
+      //   0.00-0.46  assemble - scattered parts fly IN and form the cup, which
+      //              spins to rest (the dismantle, reversed).
+      //   0.46-0.56  beat     - the finished cup holds.
+      //   0.56-0.74  portal   - camera pushes into the bowl, bloom, canvas fades.
+      //   0.74-1.00  podium   - #1 rises, then #2/#3 deal out; scores count up.
+      const asm = smoothstep(0.0, 0.46, p); // 0 = fully scattered, 1 = assembled
+      const dp = 1 - asm; // reuse the dismantle offsets, reversed
+      const cp = smoothstep(0.56, 0.74, p); // camera push into the cup
 
-      // 1 · rotate whole cup (holds at max through later phases)
-      trophy.rotation.y = rp * Math.PI * 1.35;
-      trophy.rotation.x = rp * 0.22;
+      // 1 · the cup spins to rest as it assembles
+      const spin = 1 - asm;
+      trophy.rotation.y = spin * Math.PI * 1.35;
+      trophy.rotation.x = spin * 0.22;
 
       // 2 · dismantle - offset every mover; the cup stays central (portal anchor).
       //     As the camera commits to the cup (cp), the flung parts shrink away.
@@ -272,19 +280,19 @@ export default function TrophyHero3D({ top3 = [] }) {
       const flashEl = flashRef.current;
       if (flashEl) {
         let f = 0;
-        if (p > 0.44 && p <= 0.55) f = smoothstep(0.44, 0.55, p) * 0.96;
-        else if (p > 0.55 && p <= 0.6) f = 0.96;
-        else if (p > 0.6) f = 0.96 * (1 - smoothstep(0.6, 0.72, p));
+        if (p > 0.60 && p <= 0.70) f = smoothstep(0.60, 0.70, p) * 0.96;
+        else if (p > 0.70 && p <= 0.75) f = 0.96;
+        else if (p > 0.75) f = 0.96 * (1 - smoothstep(0.75, 0.86, p));
         flashEl.style.opacity = f.toFixed(3);
       }
-      canvas.style.opacity = (1 - smoothstep(0.52, 0.63, p)).toFixed(3);
+      canvas.style.opacity = (1 - smoothstep(0.68, 0.78, p)).toFixed(3);
 
       // 4b · the title stays fixed at the top (matching the standalone podium view).
 
       // 5 · THE PODIUM RISES OUT OF THE CUP - #1 first, then #2/#3 from behind #1,
       //     all scrubbed by the same scroll progress.
-      const rev1 = smoothstep(0.6, 0.76, p); // #1 up from inside the cup
-      const rev2 = smoothstep(0.78, 0.94, p); // #2 / #3 out from behind #1
+      const rev1 = smoothstep(0.74, 0.86, p); // #1 up from inside the cup
+      const rev2 = smoothstep(0.86, 0.97, p); // #2 / #3 out from behind #1
       if (champCol) {
         champCol.style.opacity = rev1.toFixed(3);
         champCol.style.transform = `translateY(${((1 - rev1) * 165).toFixed(1)}px) scale(${(0.42 + rev1 * 0.58).toFixed(3)})`;
@@ -294,8 +302,8 @@ export default function TrophyHero3D({ top3 = [] }) {
         w.el.style.opacity = rev2.toFixed(3);
         w.el.style.transform = `translateX(${(w.dx * (1 - rev2)).toFixed(1)}px) translateY(${((1 - rev2) * 30).toFixed(1)}px) scale(${(0.82 + rev2 * 0.18).toFixed(3)})`;
       });
-      if (champNum) champNum.textContent = (champScore * smoothstep(0.62, 0.8, p)).toFixed(1);
-      wingData.forEach((w) => { if (w.numEl) w.numEl.textContent = (w.score * smoothstep(0.8, 0.95, p)).toFixed(1); });
+      if (champNum) champNum.textContent = (champScore * smoothstep(0.76, 0.90, p)).toFixed(1);
+      wingData.forEach((w) => { if (w.numEl) w.numEl.textContent = (w.score * smoothstep(0.88, 0.99, p)).toFixed(1); });
     };
 
     // ── sizing + render (only on demand) ───────────────────────────────────
@@ -307,53 +315,60 @@ export default function TrophyHero3D({ top3 = [] }) {
       camera.updateProjectionMatrix();
     };
 
-    let ticking = false;
-    let lastP = -1;
-    const update = () => {
-      ticking = false;
-      const rect = section.getBoundingClientRect();
-      const total = section.offsetHeight - window.innerHeight;
-      const p = total > 0 ? Math.min(1, Math.max(0, -rect.top / total)) : 0;
-      if (Math.abs(p - lastP) < 0.0005) return; // skip redundant frames
-      lastP = p;
-      applyProgress(p);
+    // ── autoplay: the intro runs like a video on every page load ────────────
+    const DURATION = 5200; // ms for the whole assemble -> cup -> podium film
+    let raf = 0;
+    let startedAt = 0;
+    let finished = false;
+    let safetyTimer = 0;
+
+    const finish = () => {
+      finished = true;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      applyProgress(1);
       renderer.render(scene, camera);
     };
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
+
+    const frame = (now) => {
+      if (!startedAt) startedAt = now;
+      const t = Math.min(1, (now - startedAt) / DURATION);
+      applyProgress(t);
+      renderer.render(scene, camera);
+      if (t < 1) raf = requestAnimationFrame(frame);
+      else finish();
     };
+
     const onResize = () => {
       size();
-      lastP = -1;
-      update();
+      if (finished) {
+        applyProgress(1);
+        renderer.render(scene, camera);
+      }
     };
+    window.addEventListener("resize", onResize);
 
     size();
 
-    if (reduce) {
-      // Static assembled frame (no scrub, no listeners); the page just scrolls past.
-      applyProgress(0);
-      renderer.render(scene, camera);
+    if (reduce || hasIntroPlayed()) {
+      // Reduced motion, or the film already played on this page load (returning
+      // from another tab): land straight on the finished podium.
+      finish();
     } else {
-      window.addEventListener("scroll", onScroll, { passive: true, capture: true });
-      window.addEventListener("resize", onResize);
-      applyProgress(0);
+      markIntroPlayed(); // claim it now, so a mid-film tab switch can not replay it
+      applyProgress(0); // scattered parts, before the first frame paints
       renderer.render(scene, camera);
-      // second paint next frame once the env map / layout settle
-      requestAnimationFrame(() => {
-        size();
-        lastP = -1;
-        update();
-      });
+      raf = requestAnimationFrame(frame);
+      // Safety net: if the ticker is ever throttled (backgrounded tab), make sure
+      // the page still ends up in its finished state rather than mid-film.
+      safetyTimer = window.setTimeout(() => { if (!finished) finish(); }, DURATION + 2500);
     }
 
     // ── teardown ────────────────────────────────────────────────────────────
     return () => {
-      window.removeEventListener("scroll", onScroll, { capture: true });
       window.removeEventListener("resize", onResize);
+      if (raf) cancelAnimationFrame(raf);
+      window.clearTimeout(safetyTimer);
       scene.traverse((obj) => {
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) {
@@ -399,7 +414,7 @@ export default function TrophyHero3D({ top3 = [] }) {
 
         <div className="tphero__copy" ref={copyRef}>
           <h1 className="tphero__title">
-            The <em>Green Cup</em>
+            The <em>Green Cup</em> Leaderboard
           </h1>
         </div>
       </div>

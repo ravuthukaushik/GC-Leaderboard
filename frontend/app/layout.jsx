@@ -18,7 +18,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <div className="watercolor" aria-hidden="true" />
         <TopoBackground />
         {children}
       </body>

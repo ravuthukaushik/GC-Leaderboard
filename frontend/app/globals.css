@@ -122,6 +122,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Paint the root paper too, so trackpad overscroll / rubber-band never flashes
+     a white bar above the content at the top of the page. */
+  background: var(--paper);
 }
 
 body {
@@ -150,23 +153,6 @@ body::before {
 }
 
 /* ─── TOPOGRAPHIC MAP BACKGROUND (campus terrain; felt, not seen) ─── */
-/* Optional watercolor wash (drop a file at /public/watercolor-bg.jpg). Kept faint
-   and anchored to the bottom-right so its darker teal reads as a soft corner
-   accent, never competing with cards/tables. Absent file = simply nothing shows. */
-.watercolor {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: url("/watercolor-bg.jpg") center / cover no-repeat;
-  opacity: 0.5;
-  filter: saturate(0.9);
-  /* Teal reads strongest down the right edge, with a lighter wash on the far left
-     too (like the source image); the centre content column stays on clean paper. */
-  -webkit-mask-image: linear-gradient(100deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.06) 20%, rgba(0,0,0,0.06) 42%, #000 72%);
-  mask-image: linear-gradient(100deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.06) 20%, rgba(0,0,0,0.06) 42%, #000 72%);
-}
-
 .topo {
   position: fixed;
   inset: 0;
@@ -187,13 +173,19 @@ body::before {
 }
 .topo__line {
   fill: none;
-  stroke: rgba(61, 107, 79, 0.11);
+  stroke: rgba(61, 107, 79, 0.10);
   stroke-width: 1.1;
   stroke-linejoin: round;
+  stroke-linecap: round;
+  /* Contours near the cursor are pushed outward (see topo-background); an eased
+     transition lets each one settle smoothly as the pointer sweeps past. */
+  transition: transform 360ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-/* Inner rings (peak) read a touch stronger than the outskirts. */
-.topo__line:nth-child(-n + 6) { stroke: rgba(61, 107, 79, 0.14); }
-.topo__line:nth-last-child(-n + 4) { stroke: rgba(61, 107, 79, 0.07); }
+/* Nearer bands (which travel more with the cursor) read a touch stronger, giving
+   the field depth without ever competing with cards/tables. */
+.topo__band--0 .topo__line { stroke: rgba(61, 107, 79, 0.10); stroke-width: 1; }
+.topo__band--1 .topo__line { stroke: rgba(61, 107, 79, 0.14); }
+.topo__band--2 .topo__line { stroke: rgba(61, 107, 79, 0.18); stroke-width: 1.2; }
 
 /* Accessible, unobtrusive keyboard focus */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
@@ -336,7 +328,15 @@ textarea {
   inset: -16px -50vw 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(180deg, var(--paper) 45%, rgba(250, 247, 240, 0));
+  /* A soft paper fade (never a solid top) so the topographic contours read right
+     up to the edge - no white bar, no hard "cut" line - while still lifting the
+     pinned masthead's legibility as the podium scrolls beneath it. */
+  background: linear-gradient(
+    180deg,
+    rgba(250, 247, 240, 0.55) 0%,
+    rgba(250, 247, 240, 0.32) 55%,
+    rgba(250, 247, 240, 0) 100%
+  );
 }
 
 .masthead-meta {
@@ -1747,12 +1747,21 @@ textarea {
   color: var(--brand);
 }
 
+/* Blank spacer shown until the client picks 3D vs SVG, so neither hero flashes.
+   Matches the 3D hero's footprint so the page doesn't jump on swap. */
+.tphero-placeholder {
+  display: block;
+  height: 100vh;
+  margin-top: -9vh;
+  margin-bottom: -23.9vh;
+  pointer-events: none;
+}
+
 /* ── 3D variant: scroll range for rotate → dismantle → portal → podium rising ── */
 .tphero3d {
-  height: 135vh;
-  /* Start higher (tucked under the masthead) so the title + trophy sit up in the
-     un-scrolled frame too; once pinned, top:0 governs, so the settled podium
-     positions are unaffected. */
+  /* The intro is time-driven (autoplay), not scroll-driven, so the section is a
+     single screen - no tall scroll track. */
+  height: 100vh;
   margin-top: -9vh;
   /* Pull the following content (tabs + panels) up so, once the pin releases, the
      tabs sit just beneath the stage - the same gap the analytics podium has. */
@@ -1823,6 +1832,14 @@ textarea {
   text-align: center;
   z-index: 4;
   will-change: transform, opacity;
+}
+
+/* The after-animation title must match the standalone (analytics) podium title
+   exactly - same font-size/line-height as .gcp__title, not the taller hero size. */
+.tphero3d .tphero__title {
+  margin: 0;
+  font-size: var(--fs-headline);
+  line-height: var(--lh-tight);
 }
 
 

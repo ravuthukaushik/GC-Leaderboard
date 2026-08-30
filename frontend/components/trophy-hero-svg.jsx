@@ -74,7 +74,6 @@ export default function TrophyHeroSVG() {
     });
     // Copy: headline drifts up + dims; the "scroll" cue hands off to the podium cue.
     tl.add(".tphero__copy", { translateY: [0, -26], opacity: [1, 0.7], duration: D, ease: "inOut(2)" }, 0);
-    tl.add(".tphero__cue", { opacity: [1, 0], translateY: [0, -8], duration: 460, ease: "out(2)" }, 0);
     tl.add(".tphero__reveal", { opacity: [0, 1], translateY: [12, 0], duration: 520, ease: "out(2)" }, 640);
     tl.pause();
 
@@ -114,7 +113,7 @@ export default function TrophyHeroSVG() {
         <div className="tphero__inner" ref={rootRef}>
           <div className="tphero__copy">
             <h1 className="tphero__title">
-              The <em>Green Cup</em>
+              The <em>Green Cup</em> Leaderboard
             </h1>
           </div>
 
@@ -182,7 +181,6 @@ export default function TrophyHeroSVG() {
             </g>
           </svg>
 
-          <p className="tphero__cue">Scroll - the cup comes apart</p>
           <p className="tphero__reveal" aria-hidden="true">This year&rsquo;s podium ↓</p>
         </div>
       </div>
