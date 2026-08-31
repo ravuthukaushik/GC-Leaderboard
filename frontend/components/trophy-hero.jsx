@@ -24,13 +24,13 @@ function hasWebGL() {
   }
 }
 
+// Phones get the same 3D cup film as desktop (the hero has its own phone layout
+// in globals.css). Only genuinely incapable devices fall back to the flat SVG:
+// no WebGL, reduced-motion, or very little CPU/RAM to spend on a WebGL scene.
 function isLowPower() {
-  const ua = navigator.userAgent || "";
-  const mobileUA = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(ua);
-  const smallCoarse = window.matchMedia("(max-width: 820px)").matches && window.matchMedia("(pointer: coarse)").matches;
-  const fewCores = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 4;
-  const lowMem = typeof navigator.deviceMemory === "number" && navigator.deviceMemory <= 4;
-  return mobileUA || smallCoarse || fewCores || lowMem;
+  const fewCores = typeof navigator.hardwareConcurrency === "number" && navigator.hardwareConcurrency <= 2;
+  const lowMem = typeof navigator.deviceMemory === "number" && navigator.deviceMemory <= 2;
+  return fewCores || lowMem;
 }
 
 export default function TrophyHero({ top3 = [] }) {
@@ -39,8 +39,17 @@ export default function TrophyHero({ top3 = [] }) {
   const [mode, setMode] = useState(null);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setMode(!reduce && !isLowPower() && hasWebGL() ? "three" : "svg");
+    const decide = () => {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      setMode(!reduce && !isLowPower() && hasWebGL() ? "three" : "svg");
+    };
+    decide();
+    // Re-decide when the viewport crosses the width threshold (rotation, or a
+    // resized desktop window); otherwise the first decision sticks and the wrong
+    // hero is left in a layout it does not fit.
+    const mq = window.matchMedia("(max-width: 820px)");
+    mq.addEventListener("change", decide);
+    return () => mq.removeEventListener("change", decide);
   }, []);
 
   // Undecided (SSR + first paint): a blank spacer, so nothing wrong flashes.

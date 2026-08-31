@@ -287,9 +287,12 @@ export default function TopoBackground() {
     const svgEl = root.querySelector(".topo__svg");
     const paths = Array.from(root.querySelectorAll(".topo__line"));
     const data = bands.flat(); // same order as the rendered paths
-    const R = 190;          // influence radius, in viewBox units
+    // Touch gets the same effect, with a tighter radius: fewer contours to
+    // re-emit per frame keeps a finger drag smooth on phone-class hardware.
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const R = coarse ? 130 : 190;   // influence radius, in viewBox units
     const R2 = R * R;
-    const PUSH = 30;        // max outward displacement at the cursor
+    const PUSH = coarse ? 24 : 30;  // max outward displacement at the pointer
     const scratch = new Float64Array(data.reduce((m, it) => Math.max(m, it.n), 0));
     const active = new Set();
     const mouse = { x: 0, y: 0, tx: 0, ty: 0, primed: false };
@@ -368,15 +371,24 @@ export default function TopoBackground() {
       if (raf) { cancelAnimationFrame(raf); raf = null; }
       mouse.primed = false;
     };
-    if (!reduce && !window.matchMedia("(pointer: coarse)").matches) {
+    // Pointer Events cover mouse, pen and touch, so a finger drag deforms the
+    // terrain exactly like a cursor does. Touch also gets pointerup/cancel as the
+    // "left" signal, since there is no hover state to leave.
+    if (!reduce) {
       window.addEventListener("pointermove", onMove, { passive: true });
+      window.addEventListener("pointerdown", onMove, { passive: true });
       document.addEventListener("pointerleave", onLeave);
+      window.addEventListener("pointerup", onLeave, { passive: true });
+      window.addEventListener("pointercancel", onLeave, { passive: true });
     }
 
     return () => {
       window.clearTimeout(safety);
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onMove);
       document.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointerup", onLeave);
+      window.removeEventListener("pointercancel", onLeave);
       if (raf) cancelAnimationFrame(raf);
       if (tl && typeof tl.revert === "function") tl.revert();
       else if (tl && typeof tl.pause === "function") tl.pause();
