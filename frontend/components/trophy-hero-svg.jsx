@@ -52,10 +52,12 @@ export default function TrophyHeroSVG() {
     const root = rootRef.current;
     if (!section || !root) return undefined;
 
+    // Static (assembled award, no pin, no scrub) for reduced motion AND for
+    // phones: a scrubbed dismantle costs ~1.8 screens of dead scrolling before
+    // the podium on a 375px viewport, which is a bad trade on a small screen.
     const reduce = prefersReducedMotion();
-    if (reduce) {
-      // Static: assembled award, no pin, simple presence. The CSS static layout
-      // (data-static) removes the tall spacer so there's no dead scroll.
+    const isPhone = window.matchMedia("(max-width: 560px)").matches;
+    if (reduce || isPhone) {
       section.dataset.static = "true";
       return undefined;
     }

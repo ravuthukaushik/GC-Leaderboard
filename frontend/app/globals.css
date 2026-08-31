@@ -692,6 +692,10 @@ textarea {
 .glow-surface > .border-glow-inner {
   width: 100%;
   height: 100%;
+  /* Grid/flex items default to min-width:auto, so wide content (the 860px
+     judging table) blows the wrapper past its parent and puts the whole page
+     into horizontal scroll. min-width:0 lets the inner scroller do its job. */
+  min-width: 0;
 }
 
 .card-grid {
@@ -1537,6 +1541,12 @@ textarea {
 
 .judging-table-scroll {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* The table inside is min-width:860px. Without these the scroller just grows to
+     match it and drags the whole PAGE into horizontal scrolling on a phone; the
+     wide table has to scroll inside its own box instead. */
+  max-width: 100%;
+  min-width: 0;
 }
 
 .judging-table {
@@ -1903,6 +1913,237 @@ textarea {
   line-height: var(--lh-tight);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHONE (≤ 560px)
+   Consolidated pass: the desktop layout assumes a wide masthead, a tall pinned
+   hero and roomy cards. On a phone that produces a wrapped two-row header, ~1.8
+   screens of dead scroll before any content, and cramped podium cards. Rules
+   here are grouped by the problem they solve so the intent stays legible.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 560px) {
+  /* ── Masthead: one row. The brand lockup and the admin control must share a
+     line; previously the meta wrapped underneath and doubled the header. ── */
+  .topbar {
+    /* Overrides the ≤1100px rule that stacks the bar into a column - on a phone
+       that doubles the header height for no benefit. */
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 2px 0 0;
+  }
+  /* No sticky masthead on phones: it pairs with the tall pinned hero (and its
+     JS push), neither of which exists here, and it eats vertical space. */
+  .hero-lock .topbar {
+    position: static;
+    transform: none !important;
+    padding-top: 0;
+  }
+  .brand-lockup {
+    gap: 9px;
+    min-width: 0; /* let the text ellipsize rather than push the pill down */
+  }
+  .brand-image { height: 34px; }
+  .brand-text { min-width: 0; }
+  .brand-title { font-size: 0.86rem; }
+  .brand-sub { font-size: 0.68rem; }
+  .masthead-meta {
+    flex-wrap: nowrap;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .meta-login,
+  .masthead-signout,
+  .meta-chip {
+    padding: 9px 12px;
+    font-size: 0.78rem;
+    min-height: 38px; /* comfortable thumb target */
+  }
+  /* The permissions chip is the first thing to go when space is tight. */
+  .meta-chip { display: none; }
+
+  /* ── 3D hero (the cup film) on a phone. The desktop geometry is a 100vh scene
+     with big negative margins and an absolutely-positioned title tuned to a wide
+     viewport; unchanged it drops the title on top of the leaderboard. Use the
+     small-viewport unit so mobile browser chrome can't clip the scene, and keep
+     the title/podium inside the frame. ── */
+  .tphero3d {
+    /* The podium is anchored to the BOTTOM of this section while the title sits at
+       the top, so every spare pixel of height becomes a gap between them. Sized so
+       the podium lands just under the title - matching the standalone (post-tab-
+       switch) podium, which lays both out in normal flow. */
+    height: 50svh;
+    min-height: 430px;
+    margin-top: -2vh;
+    margin-bottom: -2vh;
+  }
+  .tphero3d .tphero__copy {
+    top: 5vh;
+    padding: 0 16px;
+  }
+  .tphero3d .tphero__title {
+    font-size: clamp(1.85rem, 9.5vw, 2.5rem);
+  }
+  .tphero3d__podium {
+    padding-bottom: 2vh;
+    padding-inline: 10px;
+  }
+
+  /* ── Flat SVG hero (fallback path): no long scrub track on a phone. The section
+     collapses to its natural height so the podium is one short scroll away. ── */
+  .tphero:not(.tphero3d) {
+    height: auto;
+  }
+  /* Specificity has to match the [data-static] rule above, which sets a generous
+     desktop padding (up to 6rem) - far too much above a phone-sized trophy. */
+  .tphero__sticky,
+  .tphero[data-static="true"] .tphero__sticky {
+    position: static;
+    height: auto;
+    padding: 10px 0 0;
+  }
+  .tphero__trophy { width: min(190px, 52vw); }
+  /* The flat-hero fallback renders its own heading AND the standalone podium
+     below it, which repeats "The Green Cup Leaderboard" twice on the way down
+     the page. The podium's title is the canonical one, so drop the hero's. */
+  .tphero:not(.tphero3d) .tphero__copy { display: none; }
+  /* Scroll cue for an animation that no longer scrubs on phones - it is invisible
+     but still reserves space above the podium. */
+  .tphero__reveal { display: none; }
+  .tphero-placeholder {
+    height: 46vh;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  /* ── Podium: give the cards room. At 375px the champion card was ~99px
+     wide, so the hostel name wrapped to three lines. ── */
+  .gcp { padding-top: 4px; }
+  .gcp__intro { margin-bottom: clamp(14px, 3vh, 24px); }
+  .gcp__stage { gap: 6px; width: 100%; }
+  /* The column carries the flex sizing; the card just fills it. Putting flex on
+     the card stretches it vertically (the column is a column-direction flex
+     container) and destroys the 1-2-3 height hierarchy. */
+  .gcp__col { flex: 1 1 0; min-width: 0; }
+  .gcp__card {
+    width: 100%;
+    min-width: 0;
+    padding: 14px 6px 13px;
+    gap: 7px;
+    border-radius: 16px;
+  }
+  .gcp__col--1 .gcp__card { width: 100%; padding: 18px 7px 16px; }
+  .gcp__name { font-size: 0.78rem; }
+  .gcp__col--1 .gcp__name { font-size: 0.88rem; }
+  .gcp__num { font-size: 1.15rem; }
+  .gcp__col--1 .gcp__num { font-size: 1.4rem; }
+  .gcp__stand { width: 88%; }
+
+  /* ── Tabs: full width, evenly split, and scrollable if an admin has four. ── */
+  .segmented {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .segmented::-webkit-scrollbar { display: none; }
+  .segmented-item {
+    flex: 1 0 auto;
+    padding: 10px 13px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  /* ── Leaderboard rows: rebuilt as compact cards. The ≤780px rule collapses the
+     table to "44px 1fr", which stacks the three category scores in a tall
+     right-aligned column with no headers (they're hidden on mobile) - 216px per
+     row of unlabelled numbers. Here: identity + total on one line, the basket
+     bar beneath, then the three scores side by side with their category dot. ── */
+  /* The ≤780px rule hides the column headers entirely, which leaves the three
+     category scores completely unlabelled. Bring the header back as a compact
+     legend: drop the first four columns and keep the three category labels in
+     the same grid columns the values below sit in. */
+  .leaderboard-head {
+    display: grid;
+    grid-template-columns: 34px 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 0 0 9px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 2px;
+  }
+  .leaderboard-head > *:nth-child(-n + 4) { display: none; }
+  .leaderboard-head > *:nth-child(5) { grid-column: 2; }
+  .leaderboard-head > *:nth-child(6) { grid-column: 3; }
+  .leaderboard-head > *:nth-child(7) { grid-column: 4; }
+  .leaderboard-head .col-header-with-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  .leaderboard-row {
+    grid-template-columns: 34px 1fr 1fr 1fr;
+    gap: 7px 8px;
+    padding: 13px 0;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .leaderboard-row > *:nth-child(1) { grid-column: 1; grid-row: 1; }
+  .leaderboard-row > *:nth-child(2) { grid-column: 2 / span 2; grid-row: 1; }
+  .leaderboard-row > *:nth-child(3) { grid-column: 4; grid-row: 1; text-align: right; }
+  .leaderboard-row > *:nth-child(4) { grid-column: 1 / -1; grid-row: 2; }
+  .leaderboard-row > *:nth-child(5) { grid-column: 2; grid-row: 3; }
+  .leaderboard-row > *:nth-child(6) { grid-column: 3; grid-row: 3; }
+  .leaderboard-row > *:nth-child(7) { grid-column: 4; grid-row: 3; }
+
+  /* Category scores get their legend colour back as a leading dot, so the three
+     numbers are readable without the (hidden) column headers. */
+  .leaderboard-row > *:nth-child(5),
+  .leaderboard-row > *:nth-child(6),
+  .leaderboard-row > *:nth-child(7) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    justify-content: flex-start;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .leaderboard-row > *:nth-child(5)::before,
+  .leaderboard-row > *:nth-child(6)::before,
+  .leaderboard-row > *:nth-child(7)::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .leaderboard-row > *:nth-child(5)::before { background: var(--color-electricity); }
+  .leaderboard-row > *:nth-child(6)::before { background: var(--color-waste); }
+  .leaderboard-row > *:nth-child(7)::before { background: var(--color-events); }
+
+  .leaderboard-row .score-value { font-size: 1.02rem; }
+  .leaderboard-row .hostel-meta strong { font-size: 0.95rem; }
+
+  /* ── Collapsible sections: tighter padding, smaller heading. ── */
+  .judging-collapsible-trigger { padding: 17px 16px; }
+  .judging-trigger-left h3 { font-size: 1rem; }
+
+  /* The criteria table stays a horizontally scrolling reference table (stacking
+     it would lose the parameter/weight relationship), but tighter columns mean
+     far less sideways travel and much shorter rows. */
+  .judging-table { min-width: 600px; }
+  .judging-table thead th { padding: 0.7rem 0.85rem; font-size: 0.68rem; }
+  .judging-table tbody td { padding: 0.75rem 0.85rem; font-size: 0.8rem; }
+  .judging-scoring { font-size: 0.75rem; line-height: 1.45; }
+  .judging-section { margin-top: 2.25rem; }
+  .winners-section { margin-top: 1rem; }
+}
 
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {

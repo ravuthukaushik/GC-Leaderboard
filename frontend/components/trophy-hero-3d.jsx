@@ -371,8 +371,12 @@ export default function TrophyHero3D({ top3 = [] }) {
 
     // ── sizing + render (only on demand) ───────────────────────────────────
     const size = () => {
-      const w = section.clientWidth || window.innerWidth;
-      const h = window.innerHeight;
+      // Measure the CANVAS box, not the window. The canvas fills the hero section,
+      // which is a full screen on desktop but deliberately shorter on phones - using
+      // window.innerHeight there gives a taller buffer than the box it is drawn into
+      // and squashes the cup vertically.
+      const w = canvas.clientWidth || section.clientWidth || window.innerWidth;
+      const h = canvas.clientHeight || section.clientHeight || window.innerHeight;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();

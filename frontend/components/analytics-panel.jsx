@@ -89,7 +89,7 @@ export default function AnalyticsPanel({ payload }) {
           className="glow-surface"
           edgeSensitivity={24}
           glowColor="205 62 72"
-          backgroundColor="transparent"
+          backgroundColor="var(--glass-bg)"
           borderRadius={22}
           glowRadius={14}
           glowIntensity={0.26}
@@ -144,7 +144,7 @@ export default function AnalyticsPanel({ payload }) {
           className="glow-surface"
           edgeSensitivity={24}
           glowColor="37 78 70"
-          backgroundColor="transparent"
+          backgroundColor="var(--glass-bg)"
           borderRadius={22}
           glowRadius={14}
           glowIntensity={0.26}
@@ -201,7 +201,7 @@ export default function AnalyticsPanel({ payload }) {
         className="glow-surface"
         edgeSensitivity={26}
         glowColor="190 55 70"
-        backgroundColor="transparent"
+        backgroundColor="var(--glass-bg)"
         borderRadius={24}
         glowRadius={14}
         glowIntensity={0.28}

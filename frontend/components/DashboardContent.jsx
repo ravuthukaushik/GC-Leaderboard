@@ -53,6 +53,10 @@ export default function DashboardContent({
   // floating over the table for the rest of the tall hero section).
   useEffect(() => {
     if (!showHero) return undefined;
+    // The 1:1 masthead push exists to hold the logo in place through the TALL
+    // pinned hero. Phones get a short static hero, so the bar should simply
+    // scroll away - running this there just yanks the masthead off-screen.
+    if (window.matchMedia("(max-width: 560px)").matches) return undefined;
     const bar = document.querySelector(".hero-lock .topbar");
     const tabsEl = navRef.current;
     if (!bar || !tabsEl) return undefined;
@@ -95,6 +99,21 @@ export default function DashboardContent({
     } else {
       gsap.to(indicator, { x: target.x, width: target.width, duration: 0.42, ease: "power3.out" });
     }
+
+    // The tabs are flex-sized, so their geometry changes with the viewport (an
+    // orientation flip on a phone, or a late webfont swap). Without this the pill
+    // stays parked at its old width and drifts off the active tab.
+    const snap = () => {
+      const el = nav.querySelector('[data-tab="' + activeTab + '"]');
+      if (el) gsap.set(indicator, { x: el.offsetLeft, width: el.offsetWidth });
+    };
+    const ro = new ResizeObserver(snap);
+    ro.observe(nav);
+    window.addEventListener("orientationchange", snap);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("orientationchange", snap);
+    };
   }, [activeTab, tabs.length]);
 
   return (
