@@ -6,11 +6,11 @@
                  (a nod to the IIT Bombay campus / Powai terrain behind the Green
                  Map) draws itself stroke-by-stroke via svg.createDrawable, the
                  whole elevation field rising from the centre outward.
-   ─ GSAP      : scroll-driven work. Below, ScrollTrigger scrubs a slow parallax
-                 drift on the contour group; leaderboard rows cascade in on scroll.
-   ─ vanilla rAF : POINTER parallax. The contours are split into depth bands that
-                 lerp toward the cursor by increasing amounts, so the terrain
-                 floats in 3D as the mouse moves (à la the Anorent tactical page).
+   ─ GSAP      : scroll-driven work elsewhere (leaderboard rows cascade in). This
+                 background deliberately owns NO scroll animation - see below.
+   ─ vanilla rAF : POINTER deformation. Contour vertices are pushed outward from
+                 the cursor with a smooth falloff and the curve re-emitted, so the
+                 terrain bends open under the pointer (à la the Anorent page).
    ─ framer    : component-level React state/gesture - the tab pill, card hovers.
    If two libraries could own an effect, it belongs to whichever is doing MORE of
    the surrounding sequence.
@@ -22,11 +22,7 @@
 
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { createTimeline, stagger, svg } from "animejs";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { introForThisLoad, prefersReducedMotion } from "@/lib/intro";
-
-if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
 // This site's signature curve - a confident, slightly front-loaded ease-out.
 const SIGNATURE_EASE = "cubicBezier(0.32, 0.86, 0.18, 1)";
@@ -121,8 +117,13 @@ function buildContours() {
   // A VERY fine grid, sampled by WORLD position (not grid index) times a fixed
   // frequency - so resolution controls only smoothness, never feature size. Many
   // sample points per loop => Catmull-Rom yields long, silky-continuous curves.
-  const COLS = 168;
-  const ROWS = 114;
+  // PERFORMANCE: this grid drives both the number of paths and the bezier count
+  // per path. At 168x114 the field came out at ~970 paths / ~37k segments / 1.3MB
+  // of path data - enough to stall low-end phones on load and make every scroll
+  // frame re-rasterize a huge vector layer. Coarser sampling still looks smooth
+  // (the quintic noise is what makes the curves silky, not the sample count).
+  const COLS = 104;
+  const ROWS = 70;
   const x0 = -PAD;
   const y0 = -PAD;
   const cw = (VW + PAD * 2) / COLS;
@@ -146,7 +147,7 @@ function buildContours() {
   // Range reaches further into the elevation extremes than the field's usual
   // span, so the flat peak/basin interiors pick up a few inner rings instead of
   // reading as empty circles - spacing between levels stays the same.
-  for (let t = 0.15; t <= 0.89; t += 0.029) thresholds.push(Number(t.toFixed(3)));
+  for (let t = 0.16; t <= 0.88; t += 0.048) thresholds.push(Number(t.toFixed(3)));
 
   const key = (p) => `${Math.round(p[0] * 10)}:${Math.round(p[1] * 10)}`;
 
@@ -205,7 +206,9 @@ function buildContours() {
       const first = line[0];
       const lastP = line[line.length - 1];
       const closed = key(first) === key(lastP) || Math.hypot(first[0] - lastP[0], first[1] - lastP[1]) < Math.max(cw, ch);
-      if (line.length < 3) continue;
+      // Drop specks: tiny fragments cost a DOM node, a path string and a layer
+      // contribution each, but read as noise rather than terrain.
+      if (line.length < 9) continue;
       if (closed && line.length > 2) line.pop(); // drop duplicated closing point
       // Flat coords + bounding box: the pointer effect deforms these vertices
       // individually, so every contour reacts and none ever slides as a slab.
@@ -246,10 +249,22 @@ export default function TopoBackground() {
     if (!root || !group) return undefined;
 
     const reduce = prefersReducedMotion();
-    const play = introForThisLoad() && !reduce;
     const lines = Array.from(root.querySelectorAll(".topo__line"));
     let tl;
     let safety;
+
+    // Budget check. The stroke-draw intro calls getTotalLength() on EVERY path,
+    // which is a synchronous geometry pass - measured at ~75ms for ~970 paths on
+    // a desktop, i.e. seconds of frozen main thread on a low-end phone. Likewise
+    // the scroll parallax transforms the whole contour group, forcing the browser
+    // to re-rasterize a very large vector layer on every scroll frame. Both are
+    // luxuries: skip them unless the device can clearly afford it.
+    const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 8;
+    const mem = typeof navigator.deviceMemory === "number" ? navigator.deviceMemory : 8;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const lowPower = cores <= 4 || mem <= 4 || coarse;
+    const canAffordDraw = !reduce && !lowPower && lines.length <= 600;
+    const play = introForThisLoad() && canAffordDraw;
 
     const forceRest = () => {
       lines.forEach((l) => { l.style.strokeDasharray = "none"; l.style.strokeDashoffset = "0"; });
@@ -263,21 +278,22 @@ export default function TopoBackground() {
       tl.add(drawables, { draw: ["0 0", "0 1"], duration: 1400, delay: stagger(9, { from: "center" }) }, 0);
       tl.add(group, { opacity: [0, 1], duration: 900, ease: "out(2)" }, 0);
       safety = window.setTimeout(forceRest, 3200);
+    } else if (!reduce && introForThisLoad()) {
+      // Same "arrival" beat for a fraction of the cost: fade the finished field in
+      // (compositor-only) instead of stroking ~1000 paths.
+      forceRest();
+      group.style.opacity = "0";
+      tl = createTimeline();
+      tl.add(group, { opacity: [0, 1], duration: 700, ease: "out(2)" }, 0);
     } else {
       forceRest();
     }
 
-    // GSAP owns scroll - a slow parallax drift so the terrain feels alive.
-    let scrollTween;
-    if (!reduce) {
-      scrollTween = gsap.to(group, {
-        yPercent: -6,
-        scale: 1.05,
-        transformOrigin: "50% 40%",
-        ease: "none",
-        scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.7 }
-      });
-    }
+    // NO scroll parallax, on any device. It used to drift and scale this group as
+    // you scrolled, but `scale` on live vector art cannot be composited - the
+    // browser has to re-rasterize every path each frame to keep the strokes crisp
+    // (~13k bezier segments here). That was the single biggest cause of scroll
+    // jank, and it is a decorative effect, so it is simply gone.
 
     // LOCALIZED cursor spread, applied PER VERTEX. Each contour's points are pushed
     // outward from the pointer with a smooth falloff and the curve is re-emitted, so
@@ -289,7 +305,6 @@ export default function TopoBackground() {
     const data = bands.flat(); // same order as the rendered paths
     // Touch gets the same effect, with a tighter radius: fewer contours to
     // re-emit per frame keeps a finger drag smooth on phone-class hardware.
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
     const R = coarse ? 130 : 190;   // influence radius, in viewBox units
     const R2 = R * R;
     const PUSH = coarse ? 24 : 30;  // max outward displacement at the pointer
@@ -374,7 +389,11 @@ export default function TopoBackground() {
     // Pointer Events cover mouse, pen and touch, so a finger drag deforms the
     // terrain exactly like a cursor does. Touch also gets pointerup/cancel as the
     // "left" signal, since there is no hover state to leave.
-    if (!reduce) {
+    // Deformation re-emits path `d` strings every frame, so it is off on devices
+    // that were already struggling (few cores / little RAM). Capable touch devices
+    // still get it - only genuinely weak hardware is excluded.
+    const canAffordDeform = !reduce && cores > 4 && mem > 4;
+    if (canAffordDeform) {
       window.addEventListener("pointermove", onMove, { passive: true });
       window.addEventListener("pointerdown", onMove, { passive: true });
       document.addEventListener("pointerleave", onLeave);
@@ -392,8 +411,6 @@ export default function TopoBackground() {
       if (raf) cancelAnimationFrame(raf);
       if (tl && typeof tl.revert === "function") tl.revert();
       else if (tl && typeof tl.pause === "function") tl.pause();
-      scrollTween?.scrollTrigger?.kill();
-      scrollTween?.kill?.();
       if (group) group.style.opacity = "";
     };
   }, []);

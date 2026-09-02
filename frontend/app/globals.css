@@ -166,10 +166,13 @@ body::before {
   width: 100%;
   height: 100%;
 }
+/* No will-change here. It promoted this very large vector group to its own
+   compositing layer, which costs real memory on a phone - and it was hinting at a
+   scroll transform that no longer exists. Only the one-shot opacity fade animates
+   this group now. */
 .topo__g {
   transform-box: fill-box;
   transform-origin: 50% 40%;
-  will-change: transform, opacity;
 }
 .topo__line {
   fill: none;
@@ -182,9 +185,9 @@ body::before {
 }
 /* Nearer bands (which travel more with the cursor) read a touch stronger, giving
    the field depth without ever competing with cards/tables. */
-.topo__band--0 .topo__line { stroke: rgba(61, 107, 79, 0.10); stroke-width: 1; }
-.topo__band--1 .topo__line { stroke: rgba(61, 107, 79, 0.14); }
-.topo__band--2 .topo__line { stroke: rgba(61, 107, 79, 0.18); stroke-width: 1.2; }
+.topo__band--0 .topo__line { stroke: rgba(61, 107, 79, 0.125); stroke-width: 1; }
+.topo__band--1 .topo__line { stroke: rgba(61, 107, 79, 0.165); }
+.topo__band--2 .topo__line { stroke: rgba(61, 107, 79, 0.21); stroke-width: 1.2; }
 
 /* Accessible, unobtrusive keyboard focus */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
@@ -945,9 +948,11 @@ textarea {
   /* Flat tonal step - no gradient, no border, no inset. The steps read as quiet
      blocks of paper tone, letting the cards and the terrain carry the page. */
   /* One solid tone across all three steps - the height alone carries the ranking,
-     so the podium reads as a single object rather than three tinted blocks. Soft
-     sage picks up the contour green, sitting cool against the cream paper. */
-  background: #dce3db;
+     so the podium reads as a single object rather than three tinted blocks. Uses
+     --brand, the same green as the active tab pill, so the two green elements on
+     the page read as one system (and it sits lighter than --brand-deep, which was
+     out-weighing the cards). */
+  background: var(--brand);
   border: none;
   box-shadow: none;
 }
@@ -971,8 +976,9 @@ textarea {
 }
 
 /* One colour for all three numerals, matching the single-tone steps - the medals
-   on the cards already carry gold/silver/bronze, so repeating it here is noise. */
-.gcp__stand-num { color: var(--brand-deep); }
+   on the cards already carry gold/silver/bronze, so repeating it here is noise.
+   White reads cleanly on the deep green step. */
+.gcp__stand-num { color: #ffffff; }
 
 .gcp__name {
   margin: 0;
@@ -1089,7 +1095,10 @@ textarea {
 }
 
 .leaderboard-head {
-  padding: 0 6px 12px;
+  /* Horizontal padding must match .leaderboard-row (10px), or the header grid
+     resolves to different column widths and the labels sit ~4px off the values
+     they describe. */
+  padding: 0 10px 12px;
   border-bottom: 1px solid var(--line);
   color: var(--text-muted);
   font-size: 0.75rem;
@@ -1628,9 +1637,14 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  /* The masthead used to stack into a column for everything under 1100px, which
+     made a 114px two-row header on tablets and small laptop windows even though
+     the lockup and the admin control fit side by side well below that. Keep it a
+     row; the ≤560px block tightens it further for phones. */
   .topbar {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
   .leaderboard-head,
@@ -2061,6 +2075,28 @@ textarea {
      right-aligned column with no headers (they're hidden on mobile) - 216px per
      row of unlabelled numbers. Here: identity + total on one line, the basket
      bar beneath, then the three scores side by side with their category dot. ── */
+  /* ── Collapsible sections: tighter padding, smaller heading. ── */
+  .judging-collapsible-trigger { padding: 17px 16px; }
+  .judging-trigger-left h3 { font-size: 1rem; }
+
+  /* The criteria table stays a horizontally scrolling reference table (stacking
+     it would lose the parameter/weight relationship), but tighter columns mean
+     far less sideways travel and much shorter rows. */
+  .judging-table { min-width: 600px; }
+  .judging-table thead th { padding: 0.7rem 0.85rem; font-size: 0.68rem; }
+  .judging-table tbody td { padding: 0.75rem 0.85rem; font-size: 0.8rem; }
+  .judging-scoring { font-size: 0.75rem; line-height: 1.45; }
+  .judging-section { margin-top: 2.25rem; }
+  .winners-section { margin-top: 1rem; }
+}
+
+
+/* ═══ NARROW TABLE (≤ 780px): phones AND tablets/small laptop windows ═══
+   The base ≤780px rule collapses the table to "44px 1fr" and hides the column
+   headers, which stacks the three category scores into a tall, unlabelled
+   column. This block applies across that whole band (not just phones) so the
+   561-780px range doesn't fall back to the broken layout. */
+@media (max-width: 780px) {
   /* The ≤780px rule hides the column headers entirely, which leaves the three
      category scores completely unlabelled. Bring the header back as a compact
      legend: drop the first four columns and keep the three category labels in
@@ -2130,21 +2166,7 @@ textarea {
   .leaderboard-row .score-value { font-size: 1.02rem; }
   .leaderboard-row .hostel-meta strong { font-size: 0.95rem; }
 
-  /* ── Collapsible sections: tighter padding, smaller heading. ── */
-  .judging-collapsible-trigger { padding: 17px 16px; }
-  .judging-trigger-left h3 { font-size: 1rem; }
-
-  /* The criteria table stays a horizontally scrolling reference table (stacking
-     it would lose the parameter/weight relationship), but tighter columns mean
-     far less sideways travel and much shorter rows. */
-  .judging-table { min-width: 600px; }
-  .judging-table thead th { padding: 0.7rem 0.85rem; font-size: 0.68rem; }
-  .judging-table tbody td { padding: 0.75rem 0.85rem; font-size: 0.8rem; }
-  .judging-scoring { font-size: 0.75rem; line-height: 1.45; }
-  .judging-section { margin-top: 2.25rem; }
-  .winners-section { margin-top: 1rem; }
 }
-
 /* ─── REDUCED MOTION ─── */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
