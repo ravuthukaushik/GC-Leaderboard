@@ -108,11 +108,22 @@ export default function LeaderboardPanel({ payload }) {
                 <div className="hostel-meta">
                   <strong>{hostel.name}</strong>
                 </div>
-                <strong className="score-value">{hostel.totalScore.toFixed(1)}</strong>
+                <strong className="score-value" aria-label={`Total ${hostel.totalScore.toFixed(1)} points`}>
+                  {hostel.totalScore.toFixed(1)}
+                </strong>
                 <SegmentBar hostel={hostel} />
-                <span>{hostel.resourcesScore.toFixed(1)}</span>
-                <span>{hostel.wasteScore.toFixed(1)}</span>
-                <span>{hostel.communityScore.toFixed(1)}</span>
+                {/* The column headers are visual only (and hidden entirely on narrow
+                    screens), so each figure carries its own label - otherwise a screen
+                    reader just reads three bare numbers. */}
+                <span aria-label={`Resources ${hostel.resourcesScore.toFixed(1)}`}>
+                  {hostel.resourcesScore.toFixed(1)}
+                </span>
+                <span aria-label={`Waste ${hostel.wasteScore.toFixed(1)}`}>
+                  {hostel.wasteScore.toFixed(1)}
+                </span>
+                <span aria-label={`Community ${hostel.communityScore.toFixed(1)}`}>
+                  {hostel.communityScore.toFixed(1)}
+                </span>
               </article>
             ))}
           </div>

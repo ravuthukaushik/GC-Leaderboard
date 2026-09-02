@@ -72,14 +72,31 @@ export default function TrophyHero3D({ top3 = [] }) {
 
     const reduce = prefersReducedMotion();
 
+    // ── budget: phones render the same film, but at a lower cost ───────────
+    // GPU cost here is dominated by fragment work, which scales with the SQUARE of
+    // the pixel ratio - a 3x phone capped at 2.0 shades ~1.8x more pixels than at
+    // 1.5. That, MSAA, and the environment map are the three expensive knobs.
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const cores = typeof navigator.hardwareConcurrency === "number" ? navigator.hardwareConcurrency : 8;
+    const mem = typeof navigator.deviceMemory === "number" ? navigator.deviceMemory : 8;
+    const lite = coarse || cores <= 4 || mem <= 4;
+    // Segment counts: full detail on desktop, coarser (but still smooth at this
+    // scale) on phones.
+    const S = (hi, lo) => (lite ? lo : hi);
+
     // ── renderer / scene / camera ──────────────────────────────────────────
     let renderer;
     try {
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "high-performance" });
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: !lite, // MSAA costs extra samples + bandwidth on mobile GPUs
+        alpha: true,
+        powerPreference: lite ? "default" : "high-performance"
+      });
     } catch {
       return undefined; // no WebGL - parent should have caught this, but be safe
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
 
@@ -90,6 +107,9 @@ export default function TrophyHero3D({ top3 = [] }) {
     camera.position.copy(CAM_START);
 
     // Soft studio reflections so the metal actually reads (no HDR asset needed).
+    // This is NOT optional and must not be cheapened: metalness:1 surfaces take
+    // essentially all of their colour from the environment, so a dimmer stand-in
+    // (a gradient, say) renders the gold cup black.
     const pmrem = new THREE.PMREMGenerator(renderer);
     const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = envTex;
@@ -136,14 +156,14 @@ export default function TrophyHero3D({ top3 = [] }) {
     ].map(([x, y]) => new THREE.Vector2(x, y));
     // High segment count + welded seam so the revolve has no visible facets and no
     // hard seam line down the front where the lathe wraps (0 → 2π).
-    let bowlGeo = new THREE.LatheGeometry(bowlProfile, 128);
+    let bowlGeo = new THREE.LatheGeometry(bowlProfile, S(128, 56));
     bowlGeo = mergeVertices(bowlGeo);
     bowlGeo.computeVertexNormals();
     const bowl = new THREE.Mesh(bowlGeo, gold);
     // second material pass for the interior so the cavity reads when we fly in
     const bowlInner = new THREE.Mesh(bowlGeo, goldInner);
     // Bead around the lip - a single bright specular line that defines the rim.
-    const rimBead = new THREE.Mesh(new THREE.TorusGeometry(0.995, 0.022, 16, 160), goldBright);
+    const rimBead = new THREE.Mesh(new THREE.TorusGeometry(0.995, 0.022, S(16, 8), S(160, 72)), goldBright);
     rimBead.rotation.x = Math.PI / 2;
     rimBead.position.y = 1.005;
     const cup = new THREE.Group();
@@ -157,14 +177,14 @@ export default function TrophyHero3D({ top3 = [] }) {
     const sprig = new THREE.Group();
     // Sized in geometry, not group scale - the dismantle overwrites .scale each
     // frame, so a scaled-down group would snap back to full size mid-film.
-    const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.024, 1.14, 14), green);
+    const stalk = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.024, 1.14, S(14, 8)), green);
     stalk.position.y = 0.68;
-    const bud = new THREE.Mesh(new THREE.SphereGeometry(0.082, 20, 16), green);
+    const bud = new THREE.Mesh(new THREE.SphereGeometry(0.082, S(20, 12), S(16, 8)), green);
     bud.scale.set(0.72, 1.5, 0.72);
     bud.position.y = 1.31;
 
     // Two leaves - flattened spheres, angled up and out from the stalk.
-    const leafGeo = new THREE.SphereGeometry(0.082, 18, 14);
+    const leafGeo = new THREE.SphereGeometry(0.082, S(18, 10), S(14, 8));
     const makeLeaf = (dir) => {
       const leaf = new THREE.Mesh(leafGeo, green);
       leaf.scale.set(1.5, 0.62, 0.2);      // long, thin blade
@@ -178,13 +198,13 @@ export default function TrophyHero3D({ top3 = [] }) {
     trophy.add(sprig);
 
     // Knot (joint bead) just under the bowl.
-    const knot = new THREE.Mesh(new THREE.SphereGeometry(0.14, 24, 18), gold);
+    const knot = new THREE.Mesh(new THREE.SphereGeometry(0.14, S(24, 14), S(18, 10)), gold);
     knot.position.y = -0.2;
     parts.knot = knot;
     trophy.add(knot);
 
     // Stem - slim tapered column.
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.42, 20), gold);
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.42, S(20, 12)), gold);
     stem.position.y = -0.44;
     parts.stem = stem;
     trophy.add(stem);
@@ -193,7 +213,7 @@ export default function TrophyHero3D({ top3 = [] }) {
     // key light as bright lines, which is what sells cast metal (a plain cylinder's
     // hard edge just goes dark).
     const tier = (pts, mat) => {
-      let g = new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), 72);
+      let g = new THREE.LatheGeometry(pts.map(([x, y]) => new THREE.Vector2(x, y)), S(72, 40));
       g = mergeVertices(g);
       g.computeVertexNormals();
       return new THREE.Mesh(g, mat);
@@ -219,7 +239,7 @@ export default function TrophyHero3D({ top3 = [] }) {
 
     // Nameplate band around the upper plinth - a bright ring that reads as an
     // engraved collar and ties the base back to the rim bead.
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.425, 0.016, 14, 96), goldBright);
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.425, 0.016, S(14, 8), S(96, 48)), goldBright);
     collar.rotation.x = Math.PI / 2;
     collar.position.y = -0.735;
     base1.add(collar);
@@ -236,7 +256,7 @@ export default function TrophyHero3D({ top3 = [] }) {
       "catmullrom",
       0.4
     );
-    const handleGeo = new THREE.TubeGeometry(handleCurve, 96, 0.05, 18, false);
+    const handleGeo = new THREE.TubeGeometry(handleCurve, S(96, 48), 0.05, S(18, 10), false);
     const handleL = new THREE.Mesh(handleGeo, gold);
     handleL.position.set(-0.79, 0.5, 0);
     // Mirrored by a half turn (the curve lives in the z = 0 plane), so the open
@@ -397,13 +417,25 @@ export default function TrophyHero3D({ top3 = [] }) {
       renderer.render(scene, camera);
     };
 
+    // On phones the film draws at ~30fps instead of ~60: half the GPU work for the
+    // whole 5.2s, and a smooth 30 beats a 60 that keeps missing its budget. The
+    // timeline stays wall-clock driven, so the film still lasts exactly DURATION.
+    const MIN_FRAME_MS = lite ? 1000 / 30 : 0;
+    let lastDrawn = 0;
+
     const frame = (now) => {
       if (!startedAt) startedAt = now;
       const t = Math.min(1, (now - startedAt) / DURATION);
-      applyProgress(t);
-      renderer.render(scene, camera);
-      if (t < 1) raf = requestAnimationFrame(frame);
-      else finish();
+      if (t >= 1) {
+        finish();
+        return;
+      }
+      if (now - lastDrawn >= MIN_FRAME_MS) {
+        lastDrawn = now;
+        applyProgress(t);
+        renderer.render(scene, camera);
+      }
+      raf = requestAnimationFrame(frame);
     };
 
     const onResize = () => {
