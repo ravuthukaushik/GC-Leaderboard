@@ -50,8 +50,8 @@
   --color-electricity-soft: rgba(42, 120, 214, 0.12);
   --color-waste: #1BAF7A;                     /* Waste · green (CVD-validated) */
   --color-waste-soft: rgba(27, 175, 122, 0.13);
-  --color-events: #EB6834;                    /* Community · orange (CVD-validated) */
-  --color-events-soft: rgba(235, 104, 52, 0.13);
+  --color-events: #8E4EC6;                    /* Community · violet */
+  --color-events-soft: rgba(142, 78, 198, 0.13);
 
   /* Brand green - confident, used sparingly */
   --brand: #3D6B4F;
