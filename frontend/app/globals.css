@@ -341,6 +341,13 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  /* It links back to the main Sustainability Cell site, so give it a hover cue -
+     nothing else marks it as clickable. */
+  transition: opacity 180ms ease;
+}
+
+.brand-lockup:hover {
+  opacity: 0.72;
 }
 
 .brand-image {
