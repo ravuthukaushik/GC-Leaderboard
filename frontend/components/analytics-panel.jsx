@@ -177,8 +177,8 @@ export default function AnalyticsPanel({ payload }) {
                       <stop offset="100%" stopColor="#1BAF7A" />
                     </linearGradient>
                     <linearGradient id="barEvents" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#F4834F" />
-                      <stop offset="100%" stopColor="#EB6834" />
+                      <stop offset="0%" stopColor="#A971DA" />
+                      <stop offset="100%" stopColor="#8E4EC6" />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="var(--chart-grid)" vertical={false} />

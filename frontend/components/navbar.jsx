@@ -1,9 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
 import AppLogo from "@/components/app-logo";
-import BorderGlow from "@/components/BorderGlow";
 
 export default function Navbar({ viewer, onSignOut }) {
   const isDepartmentUser = viewer?.isAdmin;
@@ -12,6 +9,12 @@ export default function Navbar({ viewer, onSignOut }) {
     <div className="topbar">
       <AppLogo />
 
+      {/* No "Admin Login" link for the public. Staff reach the sign-in page by
+          navigating to /auth directly. This is presentation only - it hides the
+          door, it does not lock it. The actual gate is server-side: getViewer()
+          resolves role/approved from the database, the /api/admin/* routes return
+          403 for non-admins, and Supabase RLS restricts writes to role='admin'.
+          Once signed in, the controls below reappear for that session. */}
       <div className="masthead-meta">
         {isDepartmentUser ? (
           <>
@@ -20,19 +23,7 @@ export default function Navbar({ viewer, onSignOut }) {
               Sign out
             </button>
           </>
-        ) : (
-          <BorderGlow
-            className="admin-login-glow"
-            borderRadius={999}
-            colors={["#2F7A50", "#2E7D93"]}
-            backgroundColor="var(--tab-bg)"
-          >
-            <Link href="/auth" className="ghost-link meta-login">
-              <ShieldCheck size={14} />
-              Admin Login
-            </Link>
-          </BorderGlow>
-        )}
+        ) : null}
       </div>
     </div>
   );
