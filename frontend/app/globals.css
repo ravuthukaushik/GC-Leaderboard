@@ -1900,6 +1900,16 @@ textarea {
   pointer-events: none;
 }
 
+/* The podium overlay is driven entirely by the film's progress (applyProgress in
+   trophy-hero-3d). Until that runs the columns would paint at full opacity, so the
+   green step bars flash on screen BEFORE the cup does - very visible on a phone,
+   where WebGL init (shader compile + PMREM) delays the first rendered frame.
+   Start them hidden; JS owns their opacity from the first frame onward, and the
+   WebGL-failure path below reveals them explicitly. */
+.tphero3d__podium .gcp__col {
+  opacity: 0;
+}
+
 /* Match the standalone (analytics) podium exactly - no shrink. */
 .tphero3d__podium .gcp__stage {
   transform: none;
