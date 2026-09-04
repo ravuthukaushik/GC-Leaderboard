@@ -94,7 +94,11 @@ export default function TrophyHero3D({ top3 = [] }) {
         powerPreference: lite ? "default" : "high-performance"
       });
     } catch {
-      return undefined; // no WebGL - parent should have caught this, but be safe
+      // No WebGL - the parent decider should have caught this, but be safe. The
+      // podium starts hidden in CSS (so its step bars can't flash before the cup),
+      // so it has to be revealed here or the hero would be left empty.
+      podiumRef.current?.querySelectorAll(".gcp__col").forEach((c) => { c.style.opacity = "1"; });
+      return undefined;
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
